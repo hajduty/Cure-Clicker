@@ -1,5 +1,5 @@
 # Cure-Clicker
-old unfinished minecraft autoclicker
+unfinished minecraft autoclicker
 
 self destruct and certain features removed for obvious reasons
 
