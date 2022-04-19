@@ -244,8 +244,6 @@ int APIENTRY WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
     // start reach threads
 
-    CreateThread(0, 0, (LPTHREAD_START_ROUTINE)csnl, 0, 0, 0);
-
     // load imgui style
 
     // Load Fonts
