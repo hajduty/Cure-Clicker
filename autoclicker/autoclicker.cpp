@@ -38,12 +38,7 @@ void jitter() {
 				std::this_thread::sleep_for(std::chrono::milliseconds(5));
 			}
 		}
-		if (leftRando(vars::cps[vars::crntClick] != 0)) {
-			Sleep(leftRando(vars::cps[vars::crntClick]));
-		}
-		else {
-			Sleep(50);
-		}
+		Sleep(leftRando(vars::crntClick));
 	}
 }
 //only custom clicks shuffle atm
@@ -215,18 +210,18 @@ void bindThreads() {
 
 		if (GetAsyncKeyState(vars::hideBind) & 0x8000 && vars::hideBind != 0) {
 			menu::hide = !menu::hide;
-			Sleep(50);
+			Sleep(150);
 		}
 
 		if (inJava()) {
 			if (GetAsyncKeyState(vars::rightBind) & 0x8000 && vars::rightBind != 0) {
 				vars::rEnabled = !vars::rEnabled;
-				Sleep(50);
+				Sleep(150);
 			}
 
 			if (GetAsyncKeyState(vars::leftBind) & 0x8000 && vars::leftBind != 0) {
 				vars::lEnabled = !vars::lEnabled;
-				Sleep(50);
+				Sleep(150);
 			}
 
 			if (GetAsyncKeyState(vars::shiftBind) & 0x8000 && vars::shiftBind != 0) {

@@ -244,8 +244,6 @@ int APIENTRY WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
     // start reach threads
 
-    CreateThread(0, 0, (LPTHREAD_START_ROUTINE)csnl, 0, 0, 0);
-
     // load imgui style
 
     // Load Fonts
@@ -311,10 +309,10 @@ int APIENTRY WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
                 ImGui::PopFont();
                 ImGui::PopStyleColor();
 
-                ImGui::SetCursorPos({ 20.f,50.f });
+                ImGui::SetCursorPos({ 10.f,50.f });
                 ImGui::PushStyleColor(ImGuiCol_Text, icolor);
-                ImGui::PushFont(normalfont);
-                ImGui::Text("CLICKER");
+                ImGui::PushFont(smallfont);
+                ImGui::Text("PUBLIC EDITION");
                 ImGui::PopFont();
                 ImGui::PopStyleColor();
                 ImGui::PushFont(smallfont);

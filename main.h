@@ -5,6 +5,7 @@
 #include <unordered_map>
 
 #include <d3d9.h>
+#pragma comment(lib,"d3d9.lib")
 
 #include "imgui/imgui.h"
 #include "imgui/imgui_internal.h"
