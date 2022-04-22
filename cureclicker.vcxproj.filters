@@ -35,6 +35,7 @@
     <ClCompile Include="destruct\destruct.cpp">
       <Filter>destruct</Filter>
     </ClCompile>
+    <ClCompile Include="fonts\font_awesome.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="main.h" />
@@ -68,19 +69,7 @@
     <ClInclude Include="implot\implot.h">
       <Filter>implot</Filter>
     </ClInclude>
-    <ClInclude Include="fonts\font_awesome.cpp">
-      <Filter>fonts</Filter>
-    </ClInclude>
-    <ClInclude Include="fonts\fa_solid_900.h">
-      <Filter>fonts</Filter>
-    </ClInclude>
     <ClInclude Include="fonts\anotherdanger.h">
-      <Filter>fonts</Filter>
-    </ClInclude>
-    <ClInclude Include="fonts\font_awesome.h">
-      <Filter>fonts</Filter>
-    </ClInclude>
-    <ClInclude Include="fonts\font_awesome_5.h">
       <Filter>fonts</Filter>
     </ClInclude>
     <ClInclude Include="imgui\imgui_notify.h">
@@ -90,9 +79,6 @@
       <Filter>fonts</Filter>
     </ClInclude>
     <ClInclude Include="autoclicker\autoclicker.h">
-      <Filter>autoclicker</Filter>
-    </ClInclude>
-    <ClInclude Include="autoclicker\invcheck.h">
       <Filter>autoclicker</Filter>
     </ClInclude>
     <ClInclude Include="globals.h" />
@@ -111,6 +97,9 @@
     <ClInclude Include="imgui\style.h">
       <Filter>imgui</Filter>
     </ClInclude>
+    <ClInclude Include="fonts\fa_solid_900.h" />
+    <ClInclude Include="fonts\font_awesome.h" />
+    <ClInclude Include="fonts\font_awesome_5.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="imgui">

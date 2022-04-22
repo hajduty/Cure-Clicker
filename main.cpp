@@ -20,11 +20,31 @@
 #include "imgui/imfilebrowser.h"
 #include "Main.h"
 #include "imgui/style.h"
+#include "autoclicker/2kpre.h"
+#include "fonts/fa_solid_900.h"
 
 static float tab1 = 0.f;
 static float tab2 = 0.f;
 static float tab3 = 0.f;
 static float tab4 = 0.f;
+
+int hori;
+int vert;
+
+void GetDesktopResolution()
+{
+    RECT desktop;
+    // Get a handle to the desktop window
+    const HWND hDesktop = GetDesktopWindow();
+    // Get the size of screen to the variable desktop
+    GetWindowRect(hDesktop, &desktop);
+    // The top left corner will have coordinates (0,0)
+    // and the bottom right corner will have coordinates
+    // (horizontal, vertical)
+    hori = desktop.right;
+    vert = desktop.bottom;
+}
+
 
 void ImRotateStart()
 {
@@ -53,13 +73,15 @@ void ImRotateEnd(float rad, ImVec2 center = ImRotationCenter())
 }
 
 void showGraph() {
-    if (menu::graph && vars::cps[1] != 0 && !menu::hide) {
+    if (menu::graph && !menu::hide) {
         ImGui::SetNextWindowSize({ 600.f,350.f });
         ImGui::Begin("CPS GRAPH", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize);
         ImGui::SetCursorPos({ 0.f, 10.f });
 
         if (ImPlot::BeginPlot(" ")) {
-            ImPlot::PlotLine("MS", vars::cpsTemp, vars::amountClicks);
+            ImPlot::PlotLine("Custom clicks", vars::cpsTemp, vars::amountClicks);
+            ImPlot::PlotLine("Default clicks", prearray::defaultClicks, 2000);
+            ImPlot::PlotLine("Butterfly clicks", prearray::butterflyClicks, 1498);
             ImPlot::EndPlot();
         }
         ImGui::SetCursorPos({ 0.f, 310.f });
@@ -69,46 +91,15 @@ void showGraph() {
         }
         ImGui::End();
     }
-
 }
 
-void calcClicks() {
-
-    if (menu::totalClicks > 4995) {
-        return;
-    }
-    menu::totalClicks += 1;
-
-    std::cout << " ";
-    static auto captureTime2 = get_time();
-    if (menu::click == 2) {
-        if (menu::click == 2) {
-            menu::click = 1;
-            menu::time2Total = get_time() - captureTime2;
-            int totalTime = menu::time2Total - menu::time1Total;
-            menu::ms = totalTime;
-
-            if (menu::ms < menu::msLimit) {
-                if (menu::ms > 20) {
-                    vars::msArr[menu::totalClicks] = menu::ms;
-                    std::cout << vars::msArr[menu::totalClicks] << std::endl;
-                }
-            }
-
-        }
-    }
-
-    static auto captureTime1 = get_time();
-    if (menu::click == 1) {
-        menu::click = 2;
-        menu::time1Total = get_time() - captureTime1;
-        int totalTime = menu::time1Total - menu::time2Total;
-        if (totalTime > 20) {
-            std::cout << "MS: " << totalTime << "  |   CPS: " << 1000 / totalTime << "\n";
-            menu::ms = totalTime;
-            menu::cps = 1000 / totalTime;
-        }
-    }
+void console() {
+    AllocConsole();
+    ShowWindow(GetConsoleWindow(), SW_SHOW);
+    FILE* fDummy;
+    freopen_s(&fDummy, "CONIN$", "r", stdin);
+    freopen_s(&fDummy, "CONOUT$", "w", stderr);
+    freopen_s(&fDummy, "CONOUT$", "w", stdout);
 }
 
 void saveClicks() {
@@ -121,7 +112,7 @@ void saveClicks() {
         {
             std::cout << "saving " << fileName;
             for (int i = 0; i < menu::totalClicks; i++) {
-                myfile << vars::msArr[i] << "\n";
+                myfile << vars::recordedClicks[i] << "\n";
             }
             myfile.close();
         }
@@ -132,7 +123,7 @@ void saveClicks() {
         {
             std::cout << "appending " << fileName;
             for (int i = 0; i < menu::totalClicks; i++) {
-                myfile << vars::msArr[i] << "\n";
+                myfile << vars::recordedClicks[i] << "\n";
             }
             myfile.close();
         }
@@ -140,20 +131,20 @@ void saveClicks() {
 }
 
 void loadCps(std::string filename) {
-    std::fill(vars::cps, vars::cps+5000, 0);
+    std::fill(vars::loadedClicks, vars::loadedClicks+5000, 0);
     std::ifstream ms;
 
     ms.open(filename);
 
     int n = 0;
-    while (ms >> vars::cps[n]) {
-        vars::cpsTemp[n] = vars::cps[n];
+    while (ms >> vars::loadedClicks[n]) {
+        vars::cpsTemp[n] = vars::loadedClicks[n];
         n++;
         Sleep(0.05);
     }
     vars::amountClicks = n;
 
-    vars::averageCpsL = average(vars::cps, n);
+    vars::averageCpsL = average(vars::loadedClicks, n);
     vars::averageCpsR = vars::averageCpsL;
 
     std::cout << "\n" << vars::averageCpsL;
@@ -165,7 +156,7 @@ void loadCps(std::string filename) {
 void resetClicks() {
     std::cout << menu::totalClicks;
     for (int i = 0; menu::totalClicks > i; i++) {
-        vars::msArr[i] = 0;
+        vars::recordedClicks[i] = 0;
     }
     menu::totalClicks = 0;
 }
@@ -209,7 +200,8 @@ int APIENTRY WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
     io.IniFilename = nullptr; //crutial for not leaving the imgui.ini file
     io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable; // Enable Multi-Viewport / Platform Windows
 
-    static const ImWchar icons_ranges[] = { 0xf000, 0xf3ff, 0 };
+    static const ImWchar icons_ranges[] = { ICON_MIN_FA, ICON_MAX_FA, 0 };
+
     ImFontConfig icons_config;
     
     icons_config.MergeMode = true;
@@ -243,6 +235,10 @@ int APIENTRY WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
     clickThreads();
 
     // start reach threads
+
+    CreateThread(0, 0, (LPTHREAD_START_ROUTINE)console, 0, 0, 0);
+
+    GetDesktopResolution();
 
     // load imgui style
 
@@ -289,6 +285,8 @@ int APIENTRY WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
         {
             if (menu::hide == false) {
 
+                
+                ImGui::SetNextWindowPos(ImVec2(hori / 3.25, vert / 2), ImGuiCond_Once, ImVec2(0.5f, 0.5f)); // ImGui::GetWindowSize().x doesnt work
                 ImGui::SetNextWindowSize({ 450.f,280.f });
 
                 ImGuiStyle* style = &ImGui::GetStyle();
@@ -467,12 +465,14 @@ int APIENTRY WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
                 ImGui::EndChild();
 
                 if (menu::tab == 0) {
+
                     ImGui::PushStyleColor(ImGuiCol_Text, icolor);
                     ImGui::SetCursorPos({ 190.f, 65.f });
                     ImGui::PushFont(bigfont1);
                     ImGui::Text("Cure");
                     ImGui::PopFont();
                     ImGui::PopStyleColor();
+
                 }
 
                 if (menu::tab == 1) {
@@ -522,50 +522,63 @@ int APIENTRY WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
                     ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 6.f);
                     ImGui::PushStyleColor(ImGuiCol_ChildBg, test);
                     ImGui::SetCursorPos({ 135.f, 50.f });
-                    if (menu::rand != 4) {
-                        if (menu::rand == 1 && vars::amountClicks == 0) {
-                            ImGui::SetCursorPos({ 165.f,20.f });
-                            ImGui::PushStyleColor(ImGuiCol_Text, warn);
-                            ImGui::Text("LOAD CLICKS FILE");
-                            ImGui::PopStyleColor();
+                    if (menu::rand == 1)
+                        ImGui::OpenPopup("WARNING");
+                    if (menu::rand == 1 && vars::amountClicks == 0) {
+                        bool open = true;
+                        if (ImGui::BeginPopupModal("WARNING", &open, ImGuiWindowFlags_NoResize))
+                        {
+                            ImGui::Spacing();
+
+                            ImGui::Text("You haven't loaded any clicks yet");
+
+                            ImGui::Spacing();
+                            ImGui::Spacing();
+
+                            if (ImGui::Button("OK", { 240,20 })) {
+                                menu::tab = 2;
+                                ImGui::CloseCurrentPopup();
+                            }
+                            ImGui::EndPopup();
                         }
-                        
-                        ImGui::SetCursorPos({ 135.f, 50.f });
-                        ImGui::BeginChild("childLeft", { 205.f,85.f }, true);
-                        ImGui::SetCursorPos({ 5.f,5.f });
-                        ImGui::Text("Left Enabled");
-                        ImGui::SetCursorPos({ 110.f,5.f });
-                        ImGui::Checkbox("", &vars::lEnabled);
-                        
-                        ImGui::SetCursorPos({ 5.f, 30.f });
-                        ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 6.f);
-                        ImGui::PushItemWidth(130);
-                        ImGui::SliderFloat("Boost", &vars::leftBoost, 0.1, menu::maxBoost);
-                        ImGui::SetCursorPos({ 5.f, 55.f });
-                        ImGui::SliderFloat("Blockhit", &vars::blockhit, 0, 100);
-                        ImGui::PopItemWidth();
-                        ImGui::PopStyleVar();
-                        
-                        ImGui::EndChild();
-                        
-                        ImGui::SetCursorPos({ 135.f, 150.f });
-                        ImGui::BeginChild("childRight", { 205.f,85.f }, true);
-                        ImGui::SetCursorPos({ 5.f,5.f });
-                        ImGui::Text("Right Enabled");
-                        ImGui::SetCursorPos({ 110.f,5.f });
-                        ImGui::Checkbox("", &vars::rEnabled);
-                        
-                        ImGui::SetCursorPos({ 5.f, 30.f });
-                        ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 6.f);
-                        ImGui::PushItemWidth(130);
-                        ImGui::SliderFloat("Boost", &vars::rightBoost, 0, 10);
-                        ImGui::SetCursorPos({ 5.f, 60.f });
-                        ImGui::PopStyleVar();
-                        
-                        
-                        ImGui::EndChild();
                     }
-                        if (menu::rand == 4) {
+                    
+                    ImGui::SetCursorPos({ 135.f, 50.f });
+                    ImGui::BeginChild("childLeft", { 205.f,85.f }, true);
+                    ImGui::SetCursorPos({ 5.f,5.f });
+                    ImGui::Text("Left Enabled");
+                    ImGui::SetCursorPos({ 110.f,5.f });
+                    ImGui::Checkbox("", &vars::lEnabled);
+                    
+                    ImGui::SetCursorPos({ 5.f, 30.f });
+                    ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 6.f);
+                    ImGui::PushItemWidth(130);
+                    ImGui::SliderFloat("Boost", &vars::leftBoost, 0.1, menu::maxBoost);
+                    ImGui::SetCursorPos({ 5.f, 55.f });
+                    ImGui::SliderFloat("Blockhit", &vars::blockhit, 0, 100);
+                    ImGui::PopItemWidth();
+                    ImGui::PopStyleVar();
+                    
+                    ImGui::EndChild();
+                    
+                    ImGui::SetCursorPos({ 135.f, 150.f });
+                    ImGui::BeginChild("childRight", { 205.f,85.f }, true);
+                    ImGui::SetCursorPos({ 5.f,5.f });
+                    ImGui::Text("Right Enabled");
+                    ImGui::SetCursorPos({ 110.f,5.f });
+                    ImGui::Checkbox("", &vars::rEnabled);
+                    
+                    ImGui::SetCursorPos({ 5.f, 30.f });
+                    ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 6.f);
+                    ImGui::PushItemWidth(130);
+                    ImGui::SliderFloat("Boost", &vars::rightBoost, 0, 10);
+                    ImGui::SetCursorPos({ 5.f, 60.f });
+                    ImGui::PopStyleVar();
+                    
+                    
+                    ImGui::EndChild();
+                    
+                    if (menu::rand == 4) {
 
                             ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 6.f);
 
@@ -605,28 +618,21 @@ int APIENTRY WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
                             ImGui::PopStyleVar();
                     }
 
-                        if (menu::rand == 2) {
 
-                        ImGui::SetCursorPos({ 230.f, 250.f });
+                    ImGui::SetCursorPos({ 230.f, 250.f });
 
-                        if (ImGui::Button("CPS Graph", { 100.f,30.f })) {
+                    if (ImGui::Button("CPS Graph", { 100.f,30.f })) {
 
-                            for (int i = 0; i < vars::amountClicks; i++) {
-                                vars::cpsTemp[i] = vars::cps[i] / vars::leftBoost;
-                            }
-
-                            menu::graph = true;
+                        for (int i = 0; i < vars::amountClicks; i++) {
+                            vars::cpsTemp[i] = vars::loadedClicks[i] / vars::leftBoost;
                         }
 
-                        ImGui::SetCursorPos({ 130.f, 250.f });
-                        if (ImGui::Button("Shuffle", { 60.f,30.f })) {
-                            // To obtain a time-based seed
-                            unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+                        menu::graph = true;
+                    }
 
-                            // Shuffling our array
-                            std::shuffle(vars::cps, vars::cps + vars::amountClicks, std::default_random_engine(seed));
-                            std::shuffle(vars::cpsTemp, vars::cpsTemp + vars::amountClicks, std::default_random_engine(seed));
-                        }
+                    ImGui::SetCursorPos({ 130.f, 250.f });
+                    if (ImGui::Button("Shuffle", { 60.f,30.f })) {
+                        shuffleArr();
                     }
                     
                     ImGui::PopStyleColor();
@@ -717,9 +723,9 @@ int APIENTRY WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
                     ImPlot::PushStyleVar(ImPlotStyleVar_PlotPadding, ImVec2(0, 0));
                     ImGui::PushItemWidth(300);
                     if (ImPlot::BeginPlot("##", ImVec2(280,40))) {
-                        vars::msArr[1] = 190;
+                        vars::recordedClicks[1] = 190;
                         ImPlot::SetupAxes(NULL, NULL, ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_NoDecorations, ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_NoDecorations);
-                        ImPlot::PlotLine("##", vars::msArr, menu::totalClicks);
+                        ImPlot::PlotLine("##", vars::recordedClicks, menu::totalClicks);
                         ImPlot::EndPlot();
                     }
                     ImGui::PopItemWidth();
@@ -764,99 +770,27 @@ int APIENTRY WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
                     //works for now
                     ImGui::SetCursorPos({ 345.f,40.f });
-                    static std::string b1 = "Left ( " + get_key_name_by_id(vars::leftBind) + " )";
+                    std::string b1 = "Left (" + get_key_name_by_id(vars::leftBind) + ")";
                     if (ImGui::Button(b1.c_str(), {80,50})) {
-                        int g = 0;
-                        
-                        b1 = "Left (...)";
-                        
-                        while (g!=1) {
-                            for (auto i = 1; i < 256; i++)
-                            {
-                                if (GetAsyncKeyState(i) & 0x8000)
-                                {
-                                    if (i != 12)
-                                    {
-                                        vars::leftBind = i == VK_ESCAPE ? 0 : i;
-                                        b1 = "Left (" + get_key_name_by_id(i) + ")";
-                                        g = 1;
-                                        break;
-                                    }
-                                }
-                            }
-                        }
+                        keybind(vars::leftBind, "Left");
                     }
                     
                     ImGui::SetCursorPos({ 345.f,90 });
-                    static std::string b2 = "Right ( " + get_key_name_by_id(vars::rightBind) + " )";
+                    std::string b2 = "Right (" + get_key_name_by_id(vars::rightBind) + ")";
                     if (ImGui::Button(b2.c_str(), { 80,50 })) {
-                        int g = 0;
-
-                        b2 = "Right (...)";
-
-                        while (g != 1) {
-                            for (auto i = 1; i < 256; i++)
-                            {
-                                if (GetAsyncKeyState(i) & 0x8000)
-                                {
-                                    if (i != 12) {
-                                        {
-                                            vars::rightBind = i == VK_ESCAPE ? 0 : i;
-                                            b2 = "Right (" + get_key_name_by_id(i) + ")";
-                                            g = 1;
-                                            break;
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                        keybind(vars::rightBind, "Right");
                     }
+
                     ImGui::SetCursorPos({ 345.f,140.f });
-                    static std::string b3 = "Shift ( " + get_key_name_by_id(vars::shiftBind) + " )";
+                    std::string b3 = "Shift (" + get_key_name_by_id(vars::shiftBind) + ")";
                     if (ImGui::Button(b3.c_str(), { 80,50 })) {
-                        int g = 0;
-
-                        b3 = "Shift (...)";
-
-                        while (g != 1) {
-                            for (auto i = 1; i < 256; i++)
-                            {
-                                if (GetAsyncKeyState(i) & 0x8000)
-                                {
-                                    if (i != 12)
-                                    {
-                                        vars::shiftBind = i == VK_ESCAPE ? 0 : i;
-                                        b3 = "Shift (" + get_key_name_by_id(i) + ")";
-                                        g = 1;
-                                        break;
-                                    }
-                                }
-                            }
-                        }
+                        keybind(vars::shiftBind, "Shift");
                     }
 
                     ImGui::SetCursorPos({ 345.f,190.f });
-                    static std::string b4 = "Hide ( " + get_key_name_by_id(vars::hideBind) + " )";
+                    std::string b4 = "Hide ( " + get_key_name_by_id(vars::hideBind) + ")";
                     if (ImGui::Button(b4.c_str(), { 80,50 })) {
-                        int g = 0;
-
-                        b4 = "Hide (...)";
-
-                        while (g != 1) {
-                            for (auto i = 1; i < 256; i++)
-                            {
-                                if (GetAsyncKeyState(i) & 0x8000)
-                                {
-                                    if (i != 12)
-                                    {
-                                        vars::hideBind = i == VK_ESCAPE ? 0 : i;
-                                        b4 = "Hide (" + get_key_name_by_id(i) + ")";
-                                        g = 1;
-                                        break;
-                                    }
-                                }
-                            }
-                        }
+                        keybind(vars::hideBind, "Hide");
                     }
 
                     ImGui::PopFont();
@@ -905,9 +839,11 @@ int APIENTRY WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
                 ImGui::End();
                 ImGui::PopFont();
+                ImGui::SetNextWindowPos(ImVec2(hori / 1.75, vert / 2), ImGuiCond_Once, ImVec2(0.5f, 0.5f));
                 fileDialog.Display();
             }
         }
+
         ImGui::EndFrame();
         Sleep(5);
 

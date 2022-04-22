@@ -34,13 +34,6 @@ double average(int a[], float n)
     return (double)sum / n;
 }
 
-inline int get_time() {
-    auto now = std::chrono::high_resolution_clock::now();
-    auto timeMillis = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count();
-
-    return timeMillis;
-}
-
 bool CreateDeviceD3D(HWND hWnd)
 {
     if ((g_pD3D = Direct3DCreate9(D3D_SDK_VERSION)) == NULL)
@@ -75,10 +68,30 @@ void ResetDevice()
     ImGui_ImplDX9_CreateDeviceObjects();
 }
 
+void keybind(int& bind, std::string bindtext) {
+	int g = 0;
+	while (g != 1) {
+		for (auto i = 1; i < 256; i++) 
+			if (GetAsyncKeyState(i) & 0x8000)
+			{
+				if (i == 27 | i == 1 | i == 2 | i == 4) {
+					bind = 0;
+					g = 1;
+					break;
+				}
+				else {
+					bind = i;
+					g = 1;
+					break;
+				}
+			}
+	}
+}
+
 std::string get_key_name_by_id(int id)
 {
 	static std::unordered_map<int, std::string> key_names = {
-		{ 0, "None" },
+		{ 0, "NONE" },
 		{ VK_LBUTTON, "Mouse 1" },
 		{ VK_RBUTTON, "Mouse 2" },
 		{ VK_MBUTTON, "Mouse 3" },

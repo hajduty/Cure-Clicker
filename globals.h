@@ -15,9 +15,8 @@ namespace vars
 	inline double averageCpsL;						// AVERAGE LEFT CPS
 	inline double averageCpsR;						// AVERAGE RIGHT CPS
 	inline int cpsTemp[5000];						// TEMP ARRAY TO SHOW GRAPH
-	inline int cps[5000];							// CPS ARRAY (i forgot what it do)
-	inline int msArr[5000];							// CPS ARRAY (i forgot what it do)
-	inline int cpsArr[5000];						// CPS ARRAY (i forgot what it do)
+	inline int loadedClicks[5000];					// LOADED CLICKS
+	inline int recordedClicks[5000];				// ALL CURRENT RECORDED CLICKS
 	inline float leftBoost = 1;						// LEFT CPS DIVISOR
 	inline POINT pos = { 0, 0 };					// SCREEN POSITION
 	inline float rightBoost = 1;					// RIGHT CPS DIVISOR

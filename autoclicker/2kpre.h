@@ -5,7 +5,7 @@
 namespace prearray
 {
 
-int preArr[2000]
+inline int defaultClicks[2000]
 {
 	160,
 	174,
@@ -2009,7 +2009,7 @@ int preArr[2000]
 	125,
 };
 
-int butterArr[1498]{
+inline int butterflyClicks[1498]{
 	190,
 	42 ,
 	125,

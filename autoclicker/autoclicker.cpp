@@ -1,5 +1,4 @@
 #include "autoclicker.h"
-#include "invcheck.h"
 #include <random>
 #include <algorithm>
 #include "../globals.h"
@@ -7,9 +6,9 @@
 
 bool inJava() {
 	if (vars::mcOnly == 1) {
-		if (GetForegroundWindow() == FindWindowA(("LWJGL"), NULL) && ScreenToClient(GetForegroundWindow(), &vars::pos)) {
+		if (GetForegroundWindow() == FindWindowA(("LWJGL"), NULL) && ScreenToClient(GetForegroundWindow(), &vars::pos))
 			return true;
-		}
+
 		return false;
 	}
 	return true;
@@ -17,15 +16,15 @@ bool inJava() {
 
 int leftRando(int x) {
 	if (menu::rand == 0) {
-		return ((prearray::preArr[x] / vars::leftBoost) / 2);
+		return ((prearray::defaultClicks[x] / vars::leftBoost) / 2);
 	}
 	else if (menu::rand == 1) {
-		int xe = ((vars::cps[x] / vars::leftBoost) / 2);
+		int xe = ((vars::loadedClicks[x] / vars::leftBoost) / 2);
 		if (xe > 10)
 			return xe;
 	}
 	else {
-		return ((prearray::butterArr[x] / vars::leftBoost) / 2);
+		return ((prearray::butterflyClicks[x] / vars::leftBoost) / 2);
 	}
 	return 1000;
 }
@@ -34,20 +33,30 @@ void jitter() {
 	while (true) {
 		if (vars::jitter) {
 			if (inJava() && ScreenToClient(GetForegroundWindow(), &vars::pos) && (vars::lEnabled && GetAsyncKeyState(VK_LBUTTON)) | vars::lockL) {
-				mouse_event(MOUSEEVENTF_MOVE, random_int(), random_int(), 0, 0);
-				std::this_thread::sleep_for(std::chrono::milliseconds(5));
+				mouse_event(MOUSEEVENTF_MOVE, invcheck::random_int(), invcheck::random_int(), 0, 0);
+				Sleep(leftRando(vars::crntClick));
 			}
 		}
-		Sleep(leftRando(vars::crntClick));
+		Sleep(1);
 	}
 }
-//only custom clicks shuffle atm
+
 void shuffleArr() {
 	// To obtain a time-based seed
 	unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
 
-	// Shuffling our array
-	std::shuffle(vars::cps, vars::cps + vars::amountClicks, std::default_random_engine(seed));
+	// Shuffling our clicks
+
+	if (menu::rand == 0)
+		std::shuffle(prearray::defaultClicks, prearray::defaultClicks + 2000, std::default_random_engine(seed));
+
+	if (menu::rand == 1)
+		std::shuffle(vars::loadedClicks, vars::loadedClicks + vars::amountClicks, std::default_random_engine(seed));
+
+	if (menu::rand == 2)
+		std::shuffle(prearray::butterflyClicks, prearray::butterflyClicks + 1498, std::default_random_engine(seed));
+
+	std::cout << "shuffled ";
 }
 
 bool is_cursor_visible() { //From Biscoito clicker 
@@ -55,30 +64,31 @@ bool is_cursor_visible() { //From Biscoito clicker
 	{
 		if (vars::invOnly == 1)
 		{
-			return cursor_visible() || (inventory_opened && !cursor_visible());
+			return invcheck::cursor_visible() || (invcheck::inventory_opened && !invcheck::cursor_visible());
 		}
-		return cursor_visible();
+		return invcheck::cursor_visible();
 	}
 	return true;
 }
-
+// gets next rightclick cps value from selected array
 int rightRando(int x) {
 	if (menu::rand == 0) {
-		return ((prearray::preArr[x] / vars::rightBoost) / 2);
+		return ((prearray::defaultClicks[x] / vars::rightBoost) / 2);
 	}
 	else if (menu::rand == 1) {
-		int xe = ((vars::cps[x] / vars::rightBoost) / 2);
+		int xe = ((vars::loadedClicks[x] / vars::rightBoost) / 2);
 		if (xe > 10)
 			return xe;
 	}
 	else {
-		return ((prearray::butterArr[x] / vars::rightBoost) / 2);
+		return ((prearray::butterflyClicks[x] / vars::rightBoost) / 2);
 	}
 	return 1000;
 }
 
+// sends right click
 void sendRight(int currentClick) {
-	if (vars::eat == 0) {
+	if (!vars::eat) {
 		Sleep(rightRando(currentClick));
 
 		PostMessage(GetForegroundWindow(), WM_RBUTTONDOWN, MK_RBUTTON, MAKELPARAM(0, 0));
@@ -87,7 +97,7 @@ void sendRight(int currentClick) {
 
 		PostMessage(GetForegroundWindow(), WM_RBUTTONUP, MK_RBUTTON, MAKELPARAM(0, 0));
 	}
-		if (vars::eat == 1) {
+		if (vars::eat) { // sends rdown instantly after rup allowing to eat while rightclicking
 			PostMessage(GetForegroundWindow(), WM_RBUTTONUP, MK_RBUTTON, MAKELPARAM(0, 0));
 			PostMessage(GetForegroundWindow(), WM_RBUTTONDOWN, MK_RBUTTON, MAKELPARAM(0, 0));
 			Sleep(rightRando(currentClick) * 4);
@@ -98,12 +108,14 @@ void sendRight(int currentClick) {
 	}
 }
 
+// sends left click
 void sendLeft(int currentClick) {
 	if (leftRando(1) != 0) {
 
-		if (vars::breakBlock == 1) {
+		if (vars::breakBlock) { // sends ldown instantly after lup allowint go break blocks while clicking (flags on verus, karhu)
 
 			PostMessage(GetForegroundWindow(), WM_LBUTTONUP, MK_LBUTTON, MAKELPARAM(0, 0));
+
 			if (vars::blockhit != 0) {
 				if (rand() % 100 < vars::blockhit) {
 					PostMessage(GetForegroundWindow(), WM_RBUTTONDOWN, MK_RBUTTON, MAKELPARAM(0, 0));
@@ -113,16 +125,16 @@ void sendLeft(int currentClick) {
 					PostMessage(GetForegroundWindow(), WM_RBUTTONUP, MK_RBUTTON, MAKELPARAM(0, 0));
 				}
 			}
+
 			PostMessage(GetForegroundWindow(), WM_LBUTTONDOWN, MK_LBUTTON, MAKELPARAM(0, 0));
 			Sleep(leftRando(currentClick) * 2);
 
 			if (!(GetAsyncKeyState(VK_LBUTTON))) {
 				PostMessage(GetForegroundWindow(), WM_LBUTTONUP, MK_LBUTTON, MAKELPARAM(0, 0));
-				std::cout << "second click\n";
 			}
 		}
 		
-		if (vars::breakBlock == 0) {
+		if (!vars::breakBlock) {
 			Sleep(leftRando(currentClick));
 			PostMessage(GetForegroundWindow(), WM_LBUTTONDOWN, MK_LBUTTON, MAKELPARAM(0, 0));
 
@@ -148,10 +160,9 @@ void leftClickThread() {
 		if (vars::lEnabled == 1 && is_cursor_visible() && inJava()) {
 
 			if (GetAsyncKeyState(VK_LBUTTON) & 0x8000) {
-				currentLeftClick = currentLeftClick + 1;
+				currentLeftClick += 1;
 				sendLeft(currentLeftClick);
-				std::cout << leftRando(currentLeftClick) << "\n";
-				//vars::sessionClicks += 1;
+				vars::sessionClicks += 1;
 			}
 		}
 
@@ -159,17 +170,18 @@ void leftClickThread() {
 			currentLeftClick = currentLeftClick + 1;
 			sendLeft(currentLeftClick);
 			std::cout << leftRando(currentLeftClick) << "\n";
-			//vars::sessionClicks += 1;
+			vars::sessionClicks += 1;
 		}
-		if (menu::rand == 1) {
-			if (vars::cps[currentLeftClick] == 0) {
+		
+		if (vars::lEnabled) {
+			if (leftRando(currentLeftClick) < 1) {
 				if (currentLeftClick != 0) {
 					currentLeftClick = 0;
 					shuffleArr();
 				}
+
 			}
 		}
-
 		vars::crntClick = currentLeftClick;
 
 		Sleep(10);
@@ -194,14 +206,13 @@ void rightClickThread() {
 			}
 		}
 
-		if (vars::cps[currentRightClick] == 0) {
+		if (rightRando(currentRightClick) < 1) {
 			if (currentRightClick != 0) {
 				int rnd = rand() % currentRightClick + 1;
 				currentRightClick = rnd;
 				std::cout << rnd << std::endl;
 			}
 		}
-
 		Sleep(10);
 	}
 }
@@ -256,21 +267,23 @@ int time() {
 	return timeMillis;
 }
 
-int k = 0; //Flag
 void recordGame() {
 	while (true) {
-		if (vars::recordGame) {
-			if (inJava()) {
-				if ((GetAsyncKeyState(VK_LBUTTON) & 1)) {
-						calcIngame();
-				}
-			}
-	}
+
 		Sleep(4);
+
+		if (!vars::recordGame)
+			continue;
+		
+		if (!inJava())
+			continue;
+		
+		if ((GetAsyncKeyState(VK_LBUTTON) & 1))
+			calcClicks();
 	}
 }
 
-void calcIngame() {
+void calcClicks() {
 
 	if (menu::totalClicks > 4995) {
 		return;
@@ -289,8 +302,8 @@ void calcIngame() {
 			//menu::cps = 1000 / totalTime;
 
 			if (menu::ms < menu::msLimit) {
-				vars::msArr[menu::totalClicks] = menu::ms;
-				std::cout << vars::msArr[menu::totalClicks] << std::endl;
+				vars::recordedClicks[menu::totalClicks] = menu::ms;
+				std::cout << vars::recordedClicks[menu::totalClicks] << std::endl;
 			}
 
 		}
@@ -307,7 +320,6 @@ void calcIngame() {
 			menu::cps = 1000 / totalTime;
 		}
 	}
-	k = 0;
 }
 
 void clickThreads() {

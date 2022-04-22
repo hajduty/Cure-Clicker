@@ -281,6 +281,7 @@ inline bool ImGui::FileBrowser::IsOpened() const noexcept
 
 inline void ImGui::FileBrowser::Display()
 {
+
     PushID(this);
     ScopeGuard exitThis([this]
         {
