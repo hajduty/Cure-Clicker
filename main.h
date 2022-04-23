@@ -11,6 +11,7 @@
 #include "imgui/imgui_internal.h"
 #include "imgui/imgui_impl_dx9.h"
 #include "imgui/imgui_impl_win32.h"
+#include "globals.h"
 
 HWND main_hwnd = nullptr;
 
@@ -68,7 +69,7 @@ void ResetDevice()
     ImGui_ImplDX9_CreateDeviceObjects();
 }
 
-void keybind(int& bind, std::string bindtext) {
+void keybind(int& bind) {
 	int g = 0;
 	while (g != 1) {
 		for (auto i = 1; i < 256; i++) 
@@ -147,4 +148,45 @@ std::string get_key_name_by_id(int id)
 		return "F" + std::to_string((id - 0x70) + 1);
 
 	return key_names[id];
+}
+
+void GetDesktopResolution()
+{
+	RECT desktop;
+	// Get a handle to the desktop window
+	const HWND hDesktop = GetDesktopWindow();
+	// Get the size of screen to the variable desktop
+	GetWindowRect(hDesktop, &desktop);
+	// The top left corner will have coordinates (0,0)
+	// and the bottom right corner will have coordinates
+	// (horizontal, vertical)
+	menu::screen[1] = desktop.right;
+	menu::screen[2] = desktop.bottom;
+}
+
+
+void ImRotateStart()
+{
+	rotation_start_index = ImGui::GetWindowDrawList()->VtxBuffer.Size;
+}
+
+ImVec2 ImRotationCenter()
+{
+	ImVec2 l(FLT_MAX, FLT_MAX), u(-FLT_MAX, -FLT_MAX); // bounds
+
+	const auto& buf = ImGui::GetWindowDrawList()->VtxBuffer;
+	for (int i = rotation_start_index; i < buf.Size; i++)
+		l = ImMin(l, buf[i].pos), u = ImMax(u, buf[i].pos);
+
+	return ImVec2((l.x + u.x) / 2, (l.y + u.y) / 2); // or use _ClipRectStack?
+}
+
+void ImRotateEnd(float rad, ImVec2 center = ImRotationCenter())
+{
+	float s = sin(rad), c = cos(rad);
+	center = ImRotate(center, s, c) - center;
+
+	auto& buf = ImGui::GetWindowDrawList()->VtxBuffer;
+	for (int i = rotation_start_index; i < buf.Size; i++)
+		buf[i].pos = ImRotate(buf[i].pos, s, c) - center;
 }

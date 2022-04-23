@@ -35,7 +35,9 @@
     <ClCompile Include="destruct\destruct.cpp">
       <Filter>destruct</Filter>
     </ClCompile>
-    <ClCompile Include="fonts\font_awesome.cpp" />
+    <ClCompile Include="fonts\font_awesome.cpp">
+      <Filter>fonts</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="main.h" />
@@ -97,9 +99,15 @@
     <ClInclude Include="imgui\style.h">
       <Filter>imgui</Filter>
     </ClInclude>
-    <ClInclude Include="fonts\fa_solid_900.h" />
-    <ClInclude Include="fonts\font_awesome.h" />
-    <ClInclude Include="fonts\font_awesome_5.h" />
+    <ClInclude Include="fonts\font_awesome.h">
+      <Filter>fonts</Filter>
+    </ClInclude>
+    <ClInclude Include="fonts\font_awesome_5.h">
+      <Filter>fonts</Filter>
+    </ClInclude>
+    <ClInclude Include="fonts\fa_solid_900.h">
+      <Filter>fonts</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="imgui">

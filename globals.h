@@ -67,4 +67,5 @@ namespace menu
 	inline int time2Total = 1;						// TIME WHEN SECOND CLICK (in milliseconds) 
 	inline int ms = 0;								// THE TIME BETWEEN FIRST AND SECOND CLICK
 	inline int cps = 0;								// ?
+	inline int screen[2] = { 0,0 };
 }

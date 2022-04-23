@@ -28,50 +28,6 @@ static float tab2 = 0.f;
 static float tab3 = 0.f;
 static float tab4 = 0.f;
 
-int hori;
-int vert;
-
-void GetDesktopResolution()
-{
-    RECT desktop;
-    // Get a handle to the desktop window
-    const HWND hDesktop = GetDesktopWindow();
-    // Get the size of screen to the variable desktop
-    GetWindowRect(hDesktop, &desktop);
-    // The top left corner will have coordinates (0,0)
-    // and the bottom right corner will have coordinates
-    // (horizontal, vertical)
-    hori = desktop.right;
-    vert = desktop.bottom;
-}
-
-
-void ImRotateStart()
-{
-    rotation_start_index = ImGui::GetWindowDrawList()->VtxBuffer.Size;
-}
-
-ImVec2 ImRotationCenter()
-{
-    ImVec2 l(FLT_MAX, FLT_MAX), u(-FLT_MAX, -FLT_MAX); // bounds
-
-    const auto& buf = ImGui::GetWindowDrawList()->VtxBuffer;
-    for (int i = rotation_start_index; i < buf.Size; i++)
-        l = ImMin(l, buf[i].pos), u = ImMax(u, buf[i].pos);
-
-    return ImVec2((l.x + u.x) / 2, (l.y + u.y) / 2); // or use _ClipRectStack?
-}
-
-void ImRotateEnd(float rad, ImVec2 center = ImRotationCenter())
-{
-    float s = sin(rad), c = cos(rad);
-    center = ImRotate(center, s, c) - center;
-
-    auto& buf = ImGui::GetWindowDrawList()->VtxBuffer;
-    for (int i = rotation_start_index; i < buf.Size; i++)
-        buf[i].pos = ImRotate(buf[i].pos, s, c) - center;
-}
-
 void showGraph() {
     if (menu::graph && !menu::hide) {
         ImGui::SetNextWindowSize({ 600.f,350.f });
@@ -289,7 +245,7 @@ int APIENTRY WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
             if (menu::hide == false) {
 
                 
-                ImGui::SetNextWindowPos(ImVec2(hori / 3.25, vert / 2), ImGuiCond_Once, ImVec2(0.5f, 0.5f)); // ImGui::GetWindowSize().x doesnt work
+                ImGui::SetNextWindowPos(ImVec2(menu::screen[1] / 3.25, menu::screen[2] / 2), ImGuiCond_Once, ImVec2(0.5f, 0.5f)); // ImGui::GetWindowSize().x doesnt work
                 ImGui::SetNextWindowSize({ 450.f,280.f });
 
                 ImGuiStyle* style = &ImGui::GetStyle();
@@ -496,14 +452,19 @@ int APIENTRY WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
                     ImGui::SetCursorPos({ 5,7 });
                     ImGui::PushFont(mediumfont);
                     ImGui::Checkbox("MC Only", &vars::mcOnly);
+                    if (ImGui::IsItemHovered()) { ImGui::SetTooltip("Only click inside minecraft window"); }
                     ImGui::SetCursorPos({ 5,28 });
                     ImGui::Checkbox("Inventory", &vars::invOnly);
+                    if (ImGui::IsItemHovered()) { ImGui::SetTooltip("Disable clicking in inventory"); }
                     ImGui::SetCursorPos({ 5,49 });
                     ImGui::Checkbox("Shift", &vars::shiftDis);
+                    if (ImGui::IsItemHovered()) { ImGui::SetTooltip("Temporarily disables clicking while shifting"); }
                     ImGui::SetCursorPos({ 5,70 });
                     ImGui::Checkbox("Blocks [!]", &vars::breakBlock);
+                    if (ImGui::IsItemHovered()) { ImGui::SetTooltip("Allows breaking blocks while leftclicking (Might flag)"); }
                     ImGui::SetCursorPos({ 5,91 });
                     ImGui::Checkbox("Eat [!]", &vars::eat);
+                    if (ImGui::IsItemHovered()) { ImGui::SetTooltip("Allows eating while rightclicking (Might flag)"); } 
 
                     ImGui::SetCursorPos({ 5,112 });
                     if (ImGui::Checkbox("Discord", &vars::discord)) {
@@ -512,8 +473,10 @@ int APIENTRY WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
                     ImGui::SetCursorPos({ 5,133 });
                     ImGui::Checkbox("Lock L", &vars::lockL);
+                    if (ImGui::IsItemHovered()) { ImGui::SetTooltip("Lock leftclicker (leftclicker has to be off)"); }
                     ImGui::SetCursorPos({ 5,154 });
                     ImGui::Checkbox("Jitter", &vars::jitter);
+                    if (ImGui::IsItemHovered()) { ImGui::SetTooltip("Enables jitter while leftclicking"); }
 
                     ImGui::PopFont();
                     ImGui::PopStyleVar();
@@ -556,6 +519,7 @@ int APIENTRY WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
                     ImGui::SetCursorPos({ 5.f, 30.f });
                     ImGui::PushItemWidth(130);
                     ImGui::SliderFloat("Boost", &vars::leftBoost, 0.1, menu::maxBoost);
+                    if (ImGui::IsItemHovered()) { ImGui::SetTooltip("Divides selected clicks by"); }
                     ImGui::SetCursorPos({ 5.f, 55.f });
                     ImGui::SliderFloat("Blockhit", &vars::blockhit, 0, 100);
                     ImGui::PopItemWidth();
@@ -574,6 +538,7 @@ int APIENTRY WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
                     ImGui::SetCursorPos({ 5.f, 30.f });
                     ImGui::PushItemWidth(130);
                     ImGui::SliderFloat("Boost", &vars::rightBoost, 0, 10);
+                    if (ImGui::IsItemHovered()) { ImGui::SetTooltip("Divides selected clicks by"); }
                     ImGui::SetCursorPos({ 5.f, 60.f });
                     ImGui::PopStyleVar();
 
@@ -631,11 +596,13 @@ int APIENTRY WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
                         menu::graph = true;
                     }
+                    if (ImGui::IsItemHovered()) { ImGui::SetTooltip("Show clicks graph"); }
 
                     ImGui::SetCursorPos({ 244.5, 237.f });
                     if (ImGui::Button("##SHUFFLE", { 30.f,30.f })) { //ICON_FA_RECYCLE
                         shuffleArr();
                     }
+                    if (ImGui::IsItemHovered()) { ImGui::SetTooltip("Shuffle click locations"); }
                     ImGui::PushFont(smallfont);
                     ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.50f, 0.50f, 0.50f, 0.80f));
                     ImGui::SetCursorPos({ 250, 250.5 });
@@ -664,6 +631,7 @@ int APIENTRY WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
                     ImGui::SetCursorPos({ 125.f,80.f });
                     ImGui::PushItemWidth(85);
                     ImGui::SliderInt("Limit", &menu::msLimit, 0, 2000);
+                    if (ImGui::IsItemHovered()) { ImGui::SetTooltip("Limits the max threshold for click-times"); }
                     ImGui::PopItemWidth();
 
                     ImGui::SetCursorPos({ 125.f, 110.f });
@@ -678,16 +646,19 @@ int APIENTRY WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
                         resetClicks();
                         clk = "Click Here";
                     }
+                    if (ImGui::IsItemHovered()) { ImGui::SetTooltip("Reset recorded clicks array"); }
 
                     ImGui::SetCursorPos({ 125.f,140.f });
                     if (ImGui::Button("Save", { 60,20 })) {
                         saveClicks();
                     }
+                    if (ImGui::IsItemHovered()) { ImGui::SetTooltip("Save recorded clicks"); }
 
                     ImGui::SetCursorPos({ 125.f,165.f });
                     if (ImGui::Button("Load", ImVec2(130.f, 20.f))) {
                         fileDialog.Open();
                     }
+                    if (ImGui::IsItemHovered()) { ImGui::SetTooltip("Load custom clicks"); }
 
                     bool open = true;
                     if (ImGui::BeginPopupModal("Loaded", &open, ImGuiWindowFlags_NoResize))
@@ -703,6 +674,7 @@ int APIENTRY WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
                     ImGui::SetCursorPos({ 125.f,195.f });
                     ImGui::Checkbox("Add to", &menu::saveType);
+                    if (ImGui::IsItemHovered()) { ImGui::SetTooltip("Add clicks to file instead of overwriting"); }
 
                     ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 6.f);
 
@@ -721,6 +693,7 @@ int APIENTRY WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
                     ImGui::SetCursorPos({ 280.f,20.f });
                     ImGui::Checkbox("Record In-Game", &vars::recordGame);
+                    if (ImGui::IsItemHovered()) { ImGui::SetTooltip("Record clicks in-game instead"); }
 
                     ImGui::PopStyleVar();
 
@@ -778,30 +751,31 @@ int APIENTRY WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
                     
 
                     //works for now
-                    ImGui::SetCursorPos({ 345.f,40.f });
+                    ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 5.f);
+                    ImGui::SetCursorPos({ 345.f,45.f });
                     std::string b1 = "Left (" + get_key_name_by_id(vars::leftBind) + ")";
-                    if (ImGui::Button(b1.c_str(), {80,50})) {
-                        keybind(vars::leftBind, "Left");
+                    if (ImGui::Button(b1.c_str(), {80,40})) {
+                        keybind(vars::leftBind);
                     }
                     
-                    ImGui::SetCursorPos({ 345.f,90 });
+                    ImGui::SetCursorPos({ 345.f,95 });
                     std::string b2 = "Right (" + get_key_name_by_id(vars::rightBind) + ")";
-                    if (ImGui::Button(b2.c_str(), { 80,50 })) {
-                        keybind(vars::rightBind, "Right");
+                    if (ImGui::Button(b2.c_str(), { 80,40 })) {
+                        keybind(vars::rightBind);
                     }
 
-                    ImGui::SetCursorPos({ 345.f,140.f });
+                    ImGui::SetCursorPos({ 345.f,145.f });
                     std::string b3 = "Shift (" + get_key_name_by_id(vars::shiftBind) + ")";
-                    if (ImGui::Button(b3.c_str(), { 80,50 })) {
-                        keybind(vars::shiftBind, "Shift");
+                    if (ImGui::Button(b3.c_str(), { 80,40 })) {
+                        keybind(vars::shiftBind);
                     }
 
-                    ImGui::SetCursorPos({ 345.f,190.f });
-                    std::string b4 = "Hide ( " + get_key_name_by_id(vars::hideBind) + ")";
-                    if (ImGui::Button(b4.c_str(), { 80,50 })) {
-                        keybind(vars::hideBind, "Hide");
+                    ImGui::SetCursorPos({ 345.f,195.f });
+                    std::string b4 = "Hide (" + get_key_name_by_id(vars::hideBind) + ")";
+                    if (ImGui::Button(b4.c_str(), { 80,40 })) {
+                        keybind(vars::hideBind);
                     }
-
+                    ImGui::PopStyleVar();
                     ImGui::PopFont();
                 }
 
@@ -848,7 +822,7 @@ int APIENTRY WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
                 ImGui::End();
                 ImGui::PopFont();
-                ImGui::SetNextWindowPos(ImVec2(hori / 1.75, vert / 2), ImGuiCond_Once, ImVec2(0.5f, 0.5f));
+                ImGui::SetNextWindowPos(ImVec2(menu::screen[1] / 1.75, menu::screen[2] / 2), ImGuiCond_Once, ImVec2(0.5f, 0.5f));
                 fileDialog.Display();
             }
         }
