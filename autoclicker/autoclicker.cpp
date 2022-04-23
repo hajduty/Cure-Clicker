@@ -16,15 +16,19 @@ bool inJava() {
 
 int leftRando(int x) {
 	if (menu::rand == 0) {
-		return ((prearray::defaultClicks[x] / vars::leftBoost) / 2);
+		int xe = ((prearray::defaultClicks[x] / vars::leftBoost) / 2);
+		if (xe > 1)
+			return xe;
 	}
 	else if (menu::rand == 1) {
 		int xe = ((vars::loadedClicks[x] / vars::leftBoost) / 2);
-		if (xe > 10)
+		if (xe > 1)
 			return xe;
 	}
 	else {
-		return ((prearray::butterflyClicks[x] / vars::leftBoost) / 2);
+		int xe = ((prearray::butterflyClicks[x] / vars::leftBoost) / 2);
+		if (xe > 1)
+			return xe;
 	}
 	return 1000;
 }
@@ -54,7 +58,7 @@ void shuffleArr() {
 		std::shuffle(vars::loadedClicks, vars::loadedClicks + vars::amountClicks, std::default_random_engine(seed));
 
 	if (menu::rand == 2)
-		std::shuffle(prearray::butterflyClicks, prearray::butterflyClicks + 1498, std::default_random_engine(seed));
+		std::shuffle(prearray::butterflyClicks, prearray::butterflyClicks + 1469, std::default_random_engine(seed));
 
 	std::cout << "shuffled ";
 }
@@ -77,7 +81,7 @@ int rightRando(int x) {
 	}
 	else if (menu::rand == 1) {
 		int xe = ((vars::loadedClicks[x] / vars::rightBoost) / 2);
-		if (xe > 10)
+		if (xe > 5)
 			return xe;
 	}
 	else {
@@ -162,6 +166,7 @@ void leftClickThread() {
 			if (GetAsyncKeyState(VK_LBUTTON) & 0x8000) {
 				currentLeftClick += 1;
 				sendLeft(currentLeftClick);
+				std::cout << "Current click : " << currentLeftClick << "\n";
 				vars::sessionClicks += 1;
 			}
 		}
@@ -169,12 +174,12 @@ void leftClickThread() {
 		if (vars::lockL && vars::lEnabled != 1 && is_cursor_visible() && inJava()) {
 			currentLeftClick = currentLeftClick + 1;
 			sendLeft(currentLeftClick);
-			std::cout << leftRando(currentLeftClick) << "\n";
+			std::cout << leftRando(currentLeftClick) << " CRNTCLICK: " << currentLeftClick << "\n";
 			vars::sessionClicks += 1;
 		}
 		
-		if (vars::lEnabled) {
-			if (leftRando(currentLeftClick) < 1) {
+		if (vars::lEnabled | vars::lockL) {
+			if (leftRando(currentLeftClick) == 1000) {
 				if (currentLeftClick != 0) {
 					currentLeftClick = 0;
 					shuffleArr();
@@ -206,7 +211,7 @@ void rightClickThread() {
 			}
 		}
 
-		if (rightRando(currentRightClick) < 1) {
+		if (rightRando(currentRightClick) == 1000) {
 			if (currentRightClick != 0) {
 				int rnd = rand() % currentRightClick + 1;
 				currentRightClick = rnd;

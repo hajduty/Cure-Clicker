@@ -35,9 +35,12 @@ void showGraph() {
         ImGui::SetCursorPos({ 0.f, 10.f });
 
         if (ImPlot::BeginPlot(" ")) {
+            ImVec2 l1 = ImPlot::PlotToPixels(ImPlotPoint(vars::crntClick,50));
+            ImVec2 l2 = ImPlot::PlotToPixels(ImPlotPoint(vars::crntClick,-50));
             ImPlot::PlotLine("Custom clicks", vars::cpsTemp, vars::amountClicks);
             ImPlot::PlotLine("Default clicks", prearray::defaultClicks, 2000);
-            ImPlot::PlotLine("Butterfly clicks", prearray::butterflyClicks, 1498);
+            ImPlot::PlotLine("Butterfly clicks", prearray::butterflyClicks, 1469);
+            ImPlot::GetPlotDrawList()->AddLine(l1, l2, IM_COL32(255, 0, 0, 255), 2);
             ImPlot::EndPlot();
         }
         ImGui::SetCursorPos({ 0.f, 310.f });
@@ -589,7 +592,7 @@ int APIENTRY WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
                     ImGui::PushStyleColor(ImGuiCol_Button, test);
                     ImGui::SetCursorPos({ 282.5, 237.f });
                     if (ImGui::Button("##GRAPH", { 30.f,30.f })) { //ICON_FA_CHART_LINE
-
+                        
                         for (int i = 0; i < vars::amountClicks; i++) {
                             vars::cpsTemp[i] = vars::loadedClicks[i] / vars::leftBoost;
                         }

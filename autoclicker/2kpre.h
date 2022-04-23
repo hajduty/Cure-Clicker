@@ -2009,7 +2009,7 @@ inline int defaultClicks[2000]
 	125,
 };
 
-inline int butterflyClicks[1498]{
+inline int butterflyClicks[1469]{
 	190,
 	42 ,
 	125,
@@ -2324,16 +2324,13 @@ inline int butterflyClicks[1498]{
 	83 ,
 	56 ,
 	83 ,
-	0  ,
 	84 ,
 	97 ,
 	111,
 	55 ,
 	84 ,
-	0  ,
 	111,
 	84 ,
-	0  ,
 	98 ,
 	83 ,
 	180,
@@ -3481,7 +3478,6 @@ inline int butterflyClicks[1498]{
 	139,
 	84 ,
 	124,
-	71 ,
-	68
+	71
 };
 }
