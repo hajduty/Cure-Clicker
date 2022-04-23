@@ -17,17 +17,18 @@ bool inJava() {
 int leftRando(int x) {
 	if (menu::rand == 0) {
 		int xe = ((prearray::defaultClicks[x] / vars::leftBoost) / 2);
-		if (xe > 1)
+		std::cout << xe;
+		if (xe > 2)
 			return xe;
 	}
 	else if (menu::rand == 1) {
 		int xe = ((vars::loadedClicks[x] / vars::leftBoost) / 2);
-		if (xe > 1)
+		if (xe > 2)
 			return xe;
 	}
 	else {
 		int xe = ((prearray::butterflyClicks[x] / vars::leftBoost) / 2);
-		if (xe > 1)
+		if (xe > 2)
 			return xe;
 	}
 	return 1000;
@@ -38,7 +39,7 @@ void jitter() {
 		if (vars::jitter) {
 			if (inJava() && ScreenToClient(GetForegroundWindow(), &vars::pos) && (vars::lEnabled && GetAsyncKeyState(VK_LBUTTON)) | vars::lockL) {
 				mouse_event(MOUSEEVENTF_MOVE, invcheck::random_int(), invcheck::random_int(), 0, 0);
-				Sleep(leftRando(vars::crntClick));
+				Sleep(leftRando(vars::crntLeftclick));
 			}
 		}
 		Sleep(1);
@@ -53,10 +54,10 @@ void shuffleArr() {
 
 	if (menu::rand == 0)
 		std::shuffle(prearray::defaultClicks, prearray::defaultClicks + 2000, std::default_random_engine(seed));
-
+	
 	if (menu::rand == 1)
 		std::shuffle(vars::loadedClicks, vars::loadedClicks + vars::amountClicks, std::default_random_engine(seed));
-
+	
 	if (menu::rand == 2)
 		std::shuffle(prearray::butterflyClicks, prearray::butterflyClicks + 1469, std::default_random_engine(seed));
 
@@ -159,35 +160,40 @@ void sendLeft(int currentClick) {
 }
 
 void leftClickThread() {
-	int currentLeftClick = 0;
+	int currentLeftClick = 1900;
 	while (true) {
-		if (vars::lEnabled == 1 && is_cursor_visible() && inJava()) {
+		if (menu::rand == 0)
+			vars::currentClickAmount = 2000;
+		if (menu::rand == 1)
+			vars::currentClickAmount = vars::amountClicks;
+		if (menu::rand == 2)
+			vars::currentClickAmount = 1469;
+		
+		if (vars::lEnabled | vars::lockL)	
+			if ((currentLeftClick + 1) >= vars::currentClickAmount) {
+				currentLeftClick = 0;
+				shuffleArr();
+			}
+
+		if (vars::lEnabled && is_cursor_visible() && inJava()) {
 
 			if (GetAsyncKeyState(VK_LBUTTON) & 0x8000) {
 				currentLeftClick += 1;
 				sendLeft(currentLeftClick);
-				std::cout << "Current click : " << currentLeftClick << "\n";
+				//std::cout << leftRando(currentLeftClick) << " CRNTCLICK: " << currentLeftClick << "\n";
+				//std::cout << vars::currentClickAmount << currentLeftClick << "\n";
 				vars::sessionClicks += 1;
 			}
 		}
 
-		if (vars::lockL && vars::lEnabled != 1 && is_cursor_visible() && inJava()) {
-			currentLeftClick = currentLeftClick + 1;
+		if (vars::lockL && !vars::lEnabled && is_cursor_visible() && inJava()) {
+			currentLeftClick += 1;
 			sendLeft(currentLeftClick);
-			std::cout << leftRando(currentLeftClick) << " CRNTCLICK: " << currentLeftClick << "\n";
+			//std::cout << leftRando(currentLeftClick) << " CRNTCLICK: " << currentLeftClick << "\n";
 			vars::sessionClicks += 1;
 		}
-		
-		if (vars::lEnabled | vars::lockL) {
-			if (leftRando(currentLeftClick) == 1000) {
-				if (currentLeftClick != 0) {
-					currentLeftClick = 0;
-					shuffleArr();
-				}
 
-			}
-		}
-		vars::crntClick = currentLeftClick;
+		vars::crntLeftclick = currentLeftClick;
 
 		Sleep(10);
 	}
@@ -196,28 +202,22 @@ void leftClickThread() {
 void rightClickThread() {
 	int currentRightClick = { 0 };
 	while (true) {
-		if (vars::rEnabled == 1 && is_cursor_visible() && inJava()) {
-			if (!(GetAsyncKeyState(VK_RBUTTON))) {
-				if (currentRightClick != 0) {
-					int rnd = rand() % currentRightClick + 1;
-					currentRightClick = rnd;
-					std::cout << rnd << "\n";
-				}
+
+		if (vars::rEnabled)
+			if ((currentRightClick + 1) >= vars::currentClickAmount) {
+				currentRightClick = 0;
+				shuffleArr();
 			}
+
+		if (vars::rEnabled && is_cursor_visible() && inJava()) {
 			if (GetAsyncKeyState(VK_RBUTTON) & 0x8000) {
-				currentRightClick = currentRightClick + 1;
+				currentRightClick += 1;
 				sendRight(currentRightClick);
-				//vars::sessionClicks += 1;
+				vars::sessionClicks += 1;
 			}
 		}
 
-		if (rightRando(currentRightClick) == 1000) {
-			if (currentRightClick != 0) {
-				int rnd = rand() % currentRightClick + 1;
-				currentRightClick = rnd;
-				std::cout << rnd << std::endl;
-			}
-		}
+		vars::crntRightclick = currentRightClick;
 		Sleep(10);
 	}
 }

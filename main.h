@@ -160,8 +160,8 @@ void GetDesktopResolution()
 	// The top left corner will have coordinates (0,0)
 	// and the bottom right corner will have coordinates
 	// (horizontal, vertical)
-	menu::screen[1] = desktop.right;
-	menu::screen[2] = desktop.bottom;
+	menu::screen[0] = desktop.right;
+	menu::screen[1] = desktop.bottom;
 }
 
 

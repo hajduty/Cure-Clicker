@@ -2006,7 +2006,7 @@ inline int defaultClicks[2000]
 	118,
 	98,
 	125,
-	125,
+	125
 };
 
 inline int butterflyClicks[1469]{

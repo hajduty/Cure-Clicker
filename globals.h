@@ -3,7 +3,8 @@
 namespace vars
 {
 	inline bool recordGame = false;					// RECORD GAME
-	inline int crntClick;							// CURRENT CLICK
+	inline int crntLeftclick;						// CURRENT CLICK
+	inline int crntRightclick;						// CURRENT CLICK
 	inline float decreaseBy;						// DECREASE BY
 	inline float jrange = 3;						// JITTER RANGE
 	inline bool jitter = false;						// JITTER TOGGLE
@@ -36,6 +37,7 @@ namespace vars
 	inline int wtapPercent = 0;						// WTAP PERCENTAGE
 	inline bool lEnabled = false;					// LEFT CLICKER TOGGLE 	
 	inline bool rEnabled = false;					// RIGHT CLICKER TOGGLE
+	inline int currentClickAmount;					// AMOUNT OF CLICKS IN CURRENT CPS ARRAY
 }
 
 namespace destruct
@@ -49,7 +51,7 @@ namespace destruct
 namespace menu
 {
 	inline float cpsLimit = 20;						// CPS LIMIT (forgot what it do)
-	inline float maxBoost = 5;						// MAX BOOST
+	inline float maxBoost = 10;						// MAX BOOST
 	inline float maxCps = 16;						// MAX CPS FOR OTHER RAND
 	inline float minCps = 10;						// MIN CPS FOR OTHER RAND
 	inline int rand = 0;							// RANDOMIZATION OPTION

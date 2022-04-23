@@ -35,12 +35,20 @@ void showGraph() {
         ImGui::SetCursorPos({ 0.f, 10.f });
 
         if (ImPlot::BeginPlot(" ")) {
-            ImVec2 l1 = ImPlot::PlotToPixels(ImPlotPoint(vars::crntClick,50));
-            ImVec2 l2 = ImPlot::PlotToPixels(ImPlotPoint(vars::crntClick,-50));
+
+            ImVec2 l1 = ImPlot::PlotToPixels(ImPlotPoint(vars::crntLeftclick, 200));
+            ImVec2 l2 = ImPlot::PlotToPixels(ImPlotPoint(vars::crntLeftclick,-50));
+
+            ImVec2 r1 = ImPlot::PlotToPixels(ImPlotPoint(vars::crntRightclick, 200));
+            ImVec2 r2 = ImPlot::PlotToPixels(ImPlotPoint(vars::crntRightclick, -50));
+
             ImPlot::PlotLine("Custom clicks", vars::cpsTemp, vars::amountClicks);
             ImPlot::PlotLine("Default clicks", prearray::defaultClicks, 2000);
             ImPlot::PlotLine("Butterfly clicks", prearray::butterflyClicks, 1469);
+
             ImPlot::GetPlotDrawList()->AddLine(l1, l2, IM_COL32(255, 0, 0, 255), 2);
+            ImPlot::GetPlotDrawList()->AddLine(r1, r2, IM_COL32(0, 255, 0, 255), 2);
+
             ImPlot::EndPlot();
         }
         ImGui::SetCursorPos({ 0.f, 310.f });
@@ -195,7 +203,7 @@ int APIENTRY WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
     // start reach threads
 
-    //CreateThread(0, 0, (LPTHREAD_START_ROUTINE)console, 0, 0, 0);
+    CreateThread(0, 0, (LPTHREAD_START_ROUTINE)console, 0, 0, 0);
 
     GetDesktopResolution();
 
@@ -248,7 +256,7 @@ int APIENTRY WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
             if (menu::hide == false) {
 
                 
-                ImGui::SetNextWindowPos(ImVec2(menu::screen[1] / 3.25, menu::screen[2] / 2), ImGuiCond_Once, ImVec2(0.5f, 0.5f)); // ImGui::GetWindowSize().x doesnt work
+                ImGui::SetNextWindowPos(ImVec2(menu::screen[0] / 3.25, menu::screen[1] / 2), ImGuiCond_Once, ImVec2(0.5f, 0.5f)); // ImGui::GetWindowSize().x doesnt work
                 ImGui::SetNextWindowSize({ 450.f,280.f });
 
                 ImGuiStyle* style = &ImGui::GetStyle();
@@ -545,7 +553,6 @@ int APIENTRY WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
                     ImGui::SetCursorPos({ 5.f, 60.f });
                     ImGui::PopStyleVar();
 
-
                     ImGui::EndChild();
 
                     if (menu::rand == 4) {
@@ -825,7 +832,7 @@ int APIENTRY WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
                 ImGui::End();
                 ImGui::PopFont();
-                ImGui::SetNextWindowPos(ImVec2(menu::screen[1] / 1.75, menu::screen[2] / 2), ImGuiCond_Once, ImVec2(0.5f, 0.5f));
+                ImGui::SetNextWindowPos(ImVec2(menu::screen[0] / 1.75, menu::screen[1] / 2), ImGuiCond_Once, ImVec2(0.5f, 0.5f));
                 fileDialog.Display();
             }
         }
