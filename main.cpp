@@ -236,7 +236,7 @@ int APIENTRY WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
     // start reach threads
 
-    CreateThread(0, 0, (LPTHREAD_START_ROUTINE)console, 0, 0, 0);
+    //CreateThread(0, 0, (LPTHREAD_START_ROUTINE)console, 0, 0, 0);
 
     GetDesktopResolution();
 
@@ -259,16 +259,19 @@ int APIENTRY WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
         ImVec4 test = ImVec4(0.15f, 0.00f, 0.00f, 0.94f);
         ImVec4 icolor = ImVec4(0.15f, 0.00f, 0.00f, 0.94f);
         ImVec4 warn = ImVec4(1.f, 1.f, 1.f, 1.f);
+        ImVec4 test2 = ImVec4(0.15f, 0.15f, 0.15f, 1.f);
         float anim = tab1 + tab2 + tab3 + tab4;
         if (menu::style == 0) {
             HLTheme();
             test = ImVec4(0.f, 0.f, 0.f, anim);
             icolor = ImVec4(0.f, 0.00f, 0.00f, 1.f);
+            test2 = ImVec4(0.24f, 0.27f, 0.20f, 1.00f);
         }
         if (menu::style == 1) {
             embraceTheDarkness();
             test = ImVec4(0.00f, 0.00f, 0.00f, anim);
             icolor = ImVec4(1.f, 1.f, 1.f, 1.f);
+            test2 = ImVec4(0.15f, 0.15f, 0.15f, 1.f);
         }
 
         if (PeekMessage(&msg, NULL, 0U, 0U, PM_REMOVE))
@@ -478,7 +481,7 @@ int APIENTRY WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
                 if (menu::tab == 1) {
 
                     //Child 0
-                    ImGui::SetCursorPos({ 350.f, 50.f });
+                    ImGui::SetCursorPos({ 350.f, 40.f });
 
                     tab2 = 0;
                     tab3 = 0;
@@ -521,7 +524,7 @@ int APIENTRY WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
                     //Child 1
                     ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 6.f);
                     ImGui::PushStyleColor(ImGuiCol_ChildBg, test);
-                    ImGui::SetCursorPos({ 135.f, 50.f });
+                    ImGui::SetCursorPos({ 135.f, 40.f });
                     if (menu::rand == 1)
                         ImGui::OpenPopup("WARNING");
                     if (menu::rand == 1 && vars::amountClicks == 0) {
@@ -543,7 +546,7 @@ int APIENTRY WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
                         }
                     }
                     
-                    ImGui::SetCursorPos({ 135.f, 50.f });
+                    ImGui::SetCursorPos({ 135.f, 40.f });
                     ImGui::BeginChild("childLeft", { 205.f,85.f }, true);
                     ImGui::SetCursorPos({ 5.f,5.f });
                     ImGui::Text("Left Enabled");
@@ -561,7 +564,7 @@ int APIENTRY WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
                     
                     ImGui::EndChild();
                     
-                    ImGui::SetCursorPos({ 135.f, 150.f });
+                    ImGui::SetCursorPos({ 135.f, 140.f });
                     ImGui::BeginChild("childRight", { 205.f,85.f }, true);
                     ImGui::SetCursorPos({ 5.f,5.f });
                     ImGui::Text("Right Enabled");
@@ -618,10 +621,10 @@ int APIENTRY WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
                             ImGui::PopStyleVar();
                     }
 
-
-                    ImGui::SetCursorPos({ 230.f, 250.f });
-
-                    if (ImGui::Button("CPS Graph", { 100.f,30.f })) {
+                    ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 5.f);
+                    ImGui::PushStyleColor(ImGuiCol_Button, test);
+                    ImGui::SetCursorPos({ 282.5, 237.f });
+                    if (ImGui::Button("##GRAPH", { 30.f,30.f })) { //ICON_FA_CHART_LINE
 
                         for (int i = 0; i < vars::amountClicks; i++) {
                             vars::cpsTemp[i] = vars::loadedClicks[i] / vars::leftBoost;
@@ -630,13 +633,20 @@ int APIENTRY WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
                         menu::graph = true;
                     }
 
-                    ImGui::SetCursorPos({ 130.f, 250.f });
-                    if (ImGui::Button("Shuffle", { 60.f,30.f })) {
+                    ImGui::SetCursorPos({ 244.5, 237.f });
+                    if (ImGui::Button("##SHUFFLE", { 30.f,30.f })) { //ICON_FA_RECYCLE
                         shuffleArr();
                     }
+                    ImGui::PushFont(smallfont);
+                    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.50f, 0.50f, 0.50f, 0.80f));
+                    ImGui::SetCursorPos({ 250, 250.5 });
+                    ImGui::Text(ICON_FA_RECYCLE"");
+                    ImGui::SetCursorPos({ 288.5, 249.5 });
+                    ImGui::Text(ICON_FA_CHART_PIE"");
+                    ImGui::PopFont();
                     
-                    ImGui::PopStyleColor();
-                    ImGui::PopStyleVar();
+                    ImGui::PopStyleColor(3);
+                    ImGui::PopStyleVar(2);
 
                 }
 
