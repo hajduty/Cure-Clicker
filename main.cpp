@@ -545,9 +545,8 @@ int APIENTRY WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
                             ImGui::EndPopup();
                         }
                     }
-
-                    ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 6.f);
-                    ImGui::SetCursorPos({ 135.f, 40.f });
+                    
+                    ImGui::SetCursorPos({ 135.f, 50.f });
                     ImGui::BeginChild("childLeft", { 205.f,85.f }, true);
                     ImGui::SetCursorPos({ 5.f,5.f });
                     ImGui::Text("Leftclicker");
@@ -563,9 +562,8 @@ int APIENTRY WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
                     ImGui::PopStyleVar();
                     
                     ImGui::EndChild();
-
-                    ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 6.f);
-                    ImGui::SetCursorPos({ 135.f, 140.f });
+                    
+                    ImGui::SetCursorPos({ 135.f, 150.f });
                     ImGui::BeginChild("childRight", { 205.f,85.f }, true);
                     ImGui::SetCursorPos({ 5.f,5.f });
                     ImGui::Text("Rightclicker");
@@ -621,10 +619,10 @@ int APIENTRY WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
                             ImGui::PopStyleVar();
                     }
 
-                    ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 5.f);
-                    ImGui::PushStyleColor(ImGuiCol_Button, test);
-                    ImGui::SetCursorPos({ 282.5, 237.f });
-                    if (ImGui::Button("##GRAPH", { 30.f,30.f })) { //ICON_FA_CHART_LINE
+
+                    ImGui::SetCursorPos({ 230.f, 250.f });
+
+                    if (ImGui::Button("CPS Graph", { 100.f,30.f })) {
 
                         for (int i = 0; i < vars::amountClicks; i++) {
                             vars::cpsTemp[i] = vars::loadedClicks[i] / vars::leftBoost;
