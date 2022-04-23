@@ -534,7 +534,7 @@ int APIENTRY WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
                     ImGui::SetCursorPos({ 135.f, 140.f });
                     ImGui::BeginChild("childRight", { 205.f,85.f }, true);
                     ImGui::SetCursorPos({ 5.f,5.f });
-                    ImGui::Text("Right Enabled");
+                    ImGui::Text("Rightclicker");
                     ImGui::SetCursorPos({ 180,5.f });
                     ImGui::Checkbox("", &vars::rEnabled);
 
