@@ -545,14 +545,14 @@ int APIENTRY WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
                             ImGui::EndPopup();
                         }
                     }
-                    
-                    ImGui::SetCursorPos({ 135.f, 50.f });
+                    ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 6.f);
+                    ImGui::SetCursorPos({ 135.f, 40.f });
                     ImGui::BeginChild("childLeft", { 205.f,85.f }, true);
                     ImGui::SetCursorPos({ 5.f,5.f });
                     ImGui::Text("Leftclicker");
-                    ImGui::SetCursorPos({ 180.f,5.f });
+                    ImGui::SetCursorPos({ 180,5.f });
                     ImGui::Checkbox("", &vars::lEnabled);
-                    
+
                     ImGui::SetCursorPos({ 5.f, 30.f });
                     ImGui::PushItemWidth(130);
                     ImGui::SliderFloat("Boost", &vars::leftBoost, 0.1, menu::maxBoost);
@@ -560,69 +560,70 @@ int APIENTRY WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
                     ImGui::SliderFloat("Blockhit", &vars::blockhit, 0, 100);
                     ImGui::PopItemWidth();
                     ImGui::PopStyleVar();
-                    
+
                     ImGui::EndChild();
-                    
-                    ImGui::SetCursorPos({ 135.f, 150.f });
+
+                    ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 6.f);
+                    ImGui::SetCursorPos({ 135.f, 140.f });
                     ImGui::BeginChild("childRight", { 205.f,85.f }, true);
                     ImGui::SetCursorPos({ 5.f,5.f });
-                    ImGui::Text("Rightclicker");
-                    ImGui::SetCursorPos({ 180.f,5.f });
+                    ImGui::Text("Right Enabled");
+                    ImGui::SetCursorPos({ 180,5.f });
                     ImGui::Checkbox("", &vars::rEnabled);
-                    
+
                     ImGui::SetCursorPos({ 5.f, 30.f });
                     ImGui::PushItemWidth(130);
                     ImGui::SliderFloat("Boost", &vars::rightBoost, 0, 10);
                     ImGui::SetCursorPos({ 5.f, 60.f });
                     ImGui::PopStyleVar();
-                    
-                    
+
+
                     ImGui::EndChild();
-                    
+
                     if (menu::rand == 4) {
 
-                            ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 6.f);
+                        ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 6.f);
 
-                            ImGui::BeginChild("childLeft", { 205.f,110.f }, true);
-                            ImGui::SetCursorPos({ 5.f,5.f });
-                            ImGui::Text("Left Enabled");
-                            ImGui::SetCursorPos({ 110.f,5.f });
-                            ImGui::Checkbox("", &vars::lEnabled);
+                        ImGui::BeginChild("childLeft", { 205.f,110.f }, true);
+                        ImGui::SetCursorPos({ 5.f,5.f });
+                        ImGui::Text("Left Enabled");
+                        ImGui::SetCursorPos({ 110.f,5.f });
+                        ImGui::Checkbox("", &vars::lEnabled);
 
-                            ImGui::SetCursorPos({ 5.f, 30.f });
-                            ImGui::PushItemWidth(130);
-                            ImGui::SliderFloat("Max cps", &menu::maxCps, 0, menu::cpsLimit);
-                            ImGui::SetCursorPos({ 5.f, 55.f });
-                            ImGui::SliderFloat("Min cps", &menu::minCps, 0, menu::maxCps);
-                            ImGui::SetCursorPos({ 5.f, 80.f });
-                            ImGui::SliderFloat("Blockhit", &vars::blockhit, 0, 100);
-                            ImGui::PopItemWidth();
+                        ImGui::SetCursorPos({ 5.f, 30.f });
+                        ImGui::PushItemWidth(130);
+                        ImGui::SliderFloat("Max cps", &menu::maxCps, 0, menu::cpsLimit);
+                        ImGui::SetCursorPos({ 5.f, 55.f });
+                        ImGui::SliderFloat("Min cps", &menu::minCps, 0, menu::maxCps);
+                        ImGui::SetCursorPos({ 5.f, 80.f });
+                        ImGui::SliderFloat("Blockhit", &vars::blockhit, 0, 100);
+                        ImGui::PopItemWidth();
 
-                            ImGui::EndChild();
+                        ImGui::EndChild();
 
-                            ImGui::SetCursorPos({ 135.f, 170.f });
-                            ImGui::BeginChild("childRight", { 205.f,85.f }, true);
-                            ImGui::SetCursorPos({ 5.f,5.f });
-                            ImGui::Text("Right Enabled");
-                            ImGui::SetCursorPos({ 110.f,5.f });
-                            ImGui::Checkbox("", &vars::rEnabled);
+                        ImGui::SetCursorPos({ 135.f, 170.f });
+                        ImGui::BeginChild("childRight", { 205.f,85.f }, true);
+                        ImGui::SetCursorPos({ 5.f,5.f });
+                        ImGui::Text("Right Enabled");
+                        ImGui::SetCursorPos({ 110.f,5.f });
+                        ImGui::Checkbox("", &vars::rEnabled);
 
-                            ImGui::SetCursorPos({ 5.f, 30.f });
-                            ImGui::PushItemWidth(130);
-                            ImGui::SliderFloat("Boost", &vars::rightBoost, 0, 10);
-                            ImGui::SetCursorPos({ 5.f, 60.f });
-                            ImGui::PopItemWidth();
+                        ImGui::SetCursorPos({ 5.f, 30.f });
+                        ImGui::PushItemWidth(130);
+                        ImGui::SliderFloat("Boost", &vars::rightBoost, 0, 10);
+                        ImGui::SetCursorPos({ 5.f, 60.f });
+                        ImGui::PopItemWidth();
 
 
-                            ImGui::EndChild();
+                        ImGui::EndChild();
 
-                            ImGui::PopStyleVar();
+                        ImGui::PopStyleVar();
                     }
 
-
-                    ImGui::SetCursorPos({ 230.f, 250.f });
-
-                    if (ImGui::Button("CPS Graph", { 100.f,30.f })) {
+                    ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 5.f);
+                    ImGui::PushStyleColor(ImGuiCol_Button, test);
+                    ImGui::SetCursorPos({ 282.5, 237.f });
+                    if (ImGui::Button("##GRAPH", { 30.f,30.f })) { //ICON_FA_CHART_LINE
 
                         for (int i = 0; i < vars::amountClicks; i++) {
                             vars::cpsTemp[i] = vars::loadedClicks[i] / vars::leftBoost;
@@ -642,7 +643,7 @@ int APIENTRY WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
                     ImGui::SetCursorPos({ 288.5, 249.5 });
                     ImGui::Text(ICON_FA_CHART_PIE"");
                     ImGui::PopFont();
-                    
+
                     ImGui::PopStyleColor(3);
                     ImGui::PopStyleVar(2);
 
