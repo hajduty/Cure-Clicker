@@ -70,4 +70,5 @@ namespace menu
 	inline int ms = 0;								// THE TIME BETWEEN FIRST AND SECOND CLICK
 	inline int cps = 0;								// ?
 	inline int screen[2] = { 0,0 };
+	inline int shuffles = 0;						// SESSION SHUFFLES
 }

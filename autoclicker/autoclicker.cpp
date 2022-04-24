@@ -18,20 +18,23 @@ int leftRando(int x) {
 	if (menu::rand == 0) {
 		int xe = ((prearray::defaultClicks[x] / vars::leftBoost) / 2);
 		std::cout << xe;
+		menu::cps = xe;
 		if (xe > 2)
 			return xe;
 	}
 	else if (menu::rand == 1) {
 		int xe = ((vars::loadedClicks[x] / vars::leftBoost) / 2);
+		menu::cps = xe;
 		if (xe > 2)
 			return xe;
 	}
 	else {
 		int xe = ((prearray::butterflyClicks[x] / vars::leftBoost) / 2);
+		menu::cps = xe;
 		if (xe > 2)
 			return xe;
 	}
-	return 1000;
+	return 100;
 }
 
 void jitter() {
@@ -61,6 +64,7 @@ void shuffleClicks() {
 	if (menu::rand == 2)
 		std::shuffle(prearray::butterflyClicks, prearray::butterflyClicks + 1469, std::default_random_engine(seed));
 
+	menu::shuffles += 1;
 	std::cout << "shuffled ";
 }
 
@@ -88,7 +92,7 @@ int rightRando(int x) {
 	else {
 		return ((prearray::butterflyClicks[x] / vars::rightBoost) / 2);
 	}
-	return 1000;
+	return 100;
 }
 
 // sends right click

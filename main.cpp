@@ -1,4 +1,4 @@
-#include <fstream>
+﻿#include <fstream>
 #include <thread>
 #include <algorithm> 
 #include <Shobjidl.h>
@@ -31,35 +31,35 @@ static float tab2 = 0.f;
 static float tab3 = 0.f;
 static float tab4 = 0.f;
 
-static void ShowExampleAppSimpleOverlay(bool* p_open)
+static void showOverlay(bool* p_open)
 {
     ImGuiIO& io = ImGui::GetIO();
     ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav;
 
-    //ImGui::SetNextWindowBgAlpha(0.35f); // Transparent background
+    ImGui::SetNextWindowSize({ 140.f,100.f });
 
-    ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0, 0, 0, 0));
-    ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0, 0, 0, 0));
-    ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0, 0, 0, 0));
-    if (ImGui::Begin("Example: Simple overlay", p_open, window_flags))
+    if (ImGui::Begin("###", p_open, window_flags))
     {
-        ImGui::Text("Simple overlay\n" "in the corner of the screen.\n" "(right-click to change position)");
-        ImGui::Separator();
+       std::string cps = "Cps: " + std::to_string(1000 / (menu::cps+1) / 2);
+       std::string clicks = "Pos: " + std::to_string(vars::crntLeftclick);
+       std::string shuffles = "Shuffles: " + std::to_string(menu::shuffles);
+       std::string sessionclicks = std::to_string(vars::sessionClicks) + " clicks this session.";
 
-        if (ImGui::BeginPopupContextWindow())
-        {
-            if (p_open && ImGui::MenuItem("Close")) *p_open = false;
-            ImGui::EndPopup();
-        }
+       ImGui::Text(shuffles.c_str());
+       ImGui::Separator();
+       ImGui::Text(clicks.c_str());
+       ImGui::Separator();
+       ImGui::Text(cps.c_str());
+       ImGui::Separator();
+       ImGui::Text(sessionclicks.c_str());
     }
     ImGui::End();
-    ImGui::PopStyleColor(3);
 }
 
-void showGraph(bool* p_open) {
+static void showGraph(bool* p_open) {
     if (!menu::hide) {
         ImGui::SetNextWindowSize({ 600.f,350.f });
-        ImGui::Begin("CPS GRAPH", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize);
+        ImGui::Begin("CPS GRAPH", p_open, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize);
         ImGui::SetCursorPos({ 0.f, 10.f });
 
         if (ImPlot::BeginPlot(" ")) {
@@ -81,7 +81,7 @@ void showGraph(bool* p_open) {
         }
         ImGui::SetCursorPos({ 0.f, 310.f });
         if (ImGui::Button("CLOSE", { 600.f, 40.f })) {
-            menu::graph = 0;
+            *p_open = false;
             std::cout << "Graph closed\n";
         }
         ImGui::End();
@@ -161,7 +161,7 @@ void resetClicks() {
 int APIENTRY WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 {
 
-    LPCSTR wndwName = "name";
+    LPCSTR wndwName = "n";
 
     // Create application window
     WNDCLASSEX wc = { sizeof(WNDCLASSEX), CS_CLASSDC, WndProc, 0L, 0L, GetModuleHandle(NULL), NULL, NULL, NULL, NULL, wndwName, NULL };
@@ -177,8 +177,8 @@ int APIENTRY WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
     // Show the window
     ShowWindow(main_hwnd, SW_HIDE);
+    SetWindowPos(main_hwnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
     UpdateWindow(main_hwnd);
-
 
     // Setup Dear ImGui context
     ImGui::CreateContext();
@@ -282,13 +282,14 @@ int APIENTRY WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
         ImGui_ImplWin32_NewFrame();
         ImGui::NewFrame();
         {
+
+            if (vars::overlay)
+                showOverlay(&vars::overlay);
+
+            if (menu::graph)
+                showGraph(&menu::graph);
+            
             if (menu::hide == false) {
-
-                if (vars::overlay)
-                    ShowExampleAppSimpleOverlay(&vars::overlay);
-
-                if (menu::graph)
-                    showGraph(&menu::graph);
 
                 
                 ImGui::SetNextWindowPos(ImVec2(menu::screen[0] / 3.25, menu::screen[1] / 2), ImGuiCond_Once, ImVec2(0.5f, 0.5f)); // ImGui::GetWindowSize().x doesnt work
@@ -299,7 +300,19 @@ int APIENTRY WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
                 ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 12.f);
                 ImGui::PushFont(font);
 
-                ImGui::Begin("Cure", 0, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoDecoration);
+                ImGui::Begin("Cure", 0, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoDecoration | ImGuiViewportFlags_NoTaskBarIcon);
+
+                ImGui::SetCursorPos({ 425,5 });
+                ImGui::PushFont(smallfont);
+                ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 4.f);
+                if (ImGui::Button("_", { 20,20 })) {
+                    ShowWindow(main_hwnd, SW_MINIMIZE);
+                }
+                ImGui::PopStyleVar();
+                ImGui::PopFont();
+                //SW_MINIMIZE(main_hwnd);
+
+                ImGui::SameLine();
 
                 ImGui::SetCursorPos({ 0.f,0.f });
 
@@ -640,7 +653,7 @@ int APIENTRY WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
                             vars::cpsTemp[i] = vars::loadedClicks[i] / vars::leftBoost;
                         }
 
-                        menu::graph = true;
+                        menu::graph = !menu::graph;
                     }
                     if (ImGui::IsItemHovered()) { ImGui::SetTooltip("Show clicks graph"); }
 
