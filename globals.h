@@ -2,6 +2,8 @@
 
 namespace vars
 {
+	inline int defaultClicksTemp[2000];
+	inline int butterflyClicksTemp[1469];
 	inline bool recordGame = false;					// RECORD GAME
 	inline int crntLeftclick;						// CURRENT CLICK
 	inline int crntRightclick;						// CURRENT CLICK
@@ -10,7 +12,6 @@ namespace vars
 	inline bool jitter = false;						// JITTER TOGGLE
 	inline bool lockL = false;						// LOCK LEFT CLICKER (ALWAYS CLICK)
 	inline int amountClicks;						// AMOUNT OF CLICKS IN LOADED TXT FILE
-	inline bool overlay = false;					// RPC
 	inline static char fName[128] = "filename";		// SAVE FILENAME
 	inline int sessionClicks;						// CLICKS THIS SESSION
 	inline double averageCpsL;						// AVERAGE LEFT CPS
@@ -38,6 +39,9 @@ namespace vars
 	inline bool lEnabled = false;					// LEFT CLICKER TOGGLE 	
 	inline bool rEnabled = false;					// RIGHT CLICKER TOGGLE
 	inline int currentClickAmount;					// AMOUNT OF CLICKS IN CURRENT CPS ARRAY
+	inline int widthRange = 20;						// HOW MUCH TO ADD OR DECREASE 
+	inline int widthMin = 20;						// MIN MS VALUE TO MODIFY
+	inline int widthMax = 130;						// MAX MS VALUE TO MODIFY
 }
 
 namespace destruct
@@ -72,4 +76,6 @@ namespace menu
 	inline int cps = 0;								// ?
 	inline int screen[2] = { 0,0 };
 	inline int shuffles = 0;						// SESSION SHUFFLES
+	inline bool manipulate = false;					// MANIPULATE CLICKS WINDOW
+	inline bool watermark = false;					
 }

@@ -452,7 +452,7 @@ inline void ImGui::FileBrowser::Display()
             InputText("name", newDirNameBuf_->data(), newDirNameBuf_->size());
             SameLine();
 
-            if (Button("ok") && (*newDirNameBuf_)[0] != '\0')
+            if (Button("Load") && (*newDirNameBuf_)[0] != '\0')
             {
                 ScopeGuard closeNewDirPopup([] { CloseCurrentPopup(); });
                 if (create_directory(pwd_ / newDirNameBuf_->data()))
@@ -594,7 +594,7 @@ inline void ImGui::FileBrowser::Display()
 
     if (!(flags_ & ImGuiFileBrowserFlags_SelectDirectory))
     {
-        if (Button(" ok ") && !selectedFilenames_.empty())
+        if (Button("Load") && !selectedFilenames_.empty())
         {
             ok_ = true;
             CloseCurrentPopup();
@@ -602,7 +602,7 @@ inline void ImGui::FileBrowser::Display()
     }
     else
     {
-        if (Button(" ok "))
+        if (Button("Load"))
         {
             ok_ = true;
             CloseCurrentPopup();
@@ -612,7 +612,7 @@ inline void ImGui::FileBrowser::Display()
     SameLine();
 
     bool shouldExit =
-        Button("cancel") || closeFlag_ ||
+        Button("Cancel") || closeFlag_ ||
         ((flags_ & ImGuiFileBrowserFlags_CloseOnEsc) &&
             IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows) &&
             IsKeyPressed(ImGuiKey_Escape));
@@ -807,7 +807,7 @@ inline std::string ImGui::FileBrowser::ToLower(const std::string& s)
 
 inline void ImGui::FileBrowser::UpdateFileRecords()
 {
-    fileRecords_ = { FileRecord{ true, "..", "[D] ..", "" } };
+    fileRecords_ = { FileRecord{ true, "..", "[DIR] ..", "" } };
 
     for (auto& p : std::filesystem::directory_iterator(pwd_))
     {
@@ -834,7 +834,7 @@ inline void ImGui::FileBrowser::UpdateFileRecords()
 
         rcd.extension = p.path().filename().extension();
 
-        rcd.showName = (rcd.isDir ? "[D] " : "[F] ") +
+        rcd.showName = (rcd.isDir ? "[DIR] " : "[FILE] ") +
             u8StrToStr(p.path().filename().u8string());
         fileRecords_.push_back(rcd);
     }

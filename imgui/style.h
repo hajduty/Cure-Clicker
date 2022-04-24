@@ -302,13 +302,13 @@ void embraceTheDarkness()
 	ImGuiStyle& style = ImGui::GetStyle();
 	style.WindowPadding = ImVec2(0.00f, 0.00f);
 	style.FramePadding = ImVec2(1.f, 1.f);
-	style.ItemSpacing = ImVec2(4.f, 4.00f);
+	style.ItemSpacing = ImVec2(4.f, 4.0f);
 	style.ItemInnerSpacing = ImVec2(4.f, 4.f);
 	style.TouchExtraPadding = ImVec2(0.00f, 0.00f);
 	style.PopupBorderSize = 0.00f;
 	style.FrameBorderSize = 0.00f;
 	style.IndentSpacing = 21.00f;
-	style.ScrollbarSize = 12.5f;
+	style.ScrollbarSize = 0.1f;
 	style.GrabMinSize = 10.00f;
 	style.WindowBorderSize = 1.00f;
 	style.TabBorderSize = 0.00f;

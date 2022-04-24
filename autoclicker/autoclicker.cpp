@@ -6,12 +6,53 @@
 
 bool inJava() {
 	if (vars::mcOnly == 1) {
-		if (GetForegroundWindow() == FindWindowA(("LWJGL"), NULL) && ScreenToClient(GetForegroundWindow(), &vars::pos))
+		if (GetForegroundWindow() == FindWindowA(("LWJGL"), NULL))
 			return true;
 
 		return false;
 	}
+
+	// if current window is clicker window, clicking should be disabled
+	if (GetForegroundWindow() == FindWindowA(NULL, "name"))
+		return false;
+
 	return true;
+}
+
+void arrayWidth() {
+	srand(time(0));
+	int ran = rand() % vars::widthRange + 1;
+	if (menu::rand == 0)
+		for (int i = 0; i < 2000; i++) {
+
+			if (prearray::defaultClicks[i] > vars::widthMax)
+				prearray::defaultClicks[i] += ran;
+
+			if (prearray::defaultClicks[i] < vars::widthMin)
+				prearray::defaultClicks[i] -= ran;
+		}
+	if (menu::rand == 1) {
+		for (int i = 0; i < 2000; i++) {
+
+			if (vars::loadedClicks[i] > vars::widthMax)
+				vars::loadedClicks[i] += ran;
+
+			if (vars::loadedClicks[i] < vars::widthMin)
+				vars::loadedClicks[i] -= ran;
+		}
+	}
+
+	if (menu::rand == 2) {
+		for (int i = 0; i < 2000; i++) {
+
+			if (prearray::butterflyClicks[i] > vars::widthMax)
+				prearray::butterflyClicks[i] += ran;
+
+			if (prearray::butterflyClicks[i] < vars::widthMin)
+				prearray::butterflyClicks[i] -= ran;
+		}
+	}
+
 }
 
 int leftRando(int x) {
@@ -168,6 +209,8 @@ void sendLeft(int currentClick) {
 }
 
 void leftClickThread() {
+	std::copy(std::begin(prearray::defaultClicks), std::end(prearray::defaultClicks), std::begin(vars::defaultClicksTemp));
+	std::copy(std::begin(prearray::butterflyClicks), std::end(prearray::butterflyClicks), std::begin(vars::butterflyClicksTemp));
 	while (true) {
 
 		Sleep(10);

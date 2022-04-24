@@ -28,11 +28,79 @@ int rotation_start_index;
 
 double average(int a[], float n)
 {
-    float sum = 0;
-    for (int i = 0; i < n; i++) {
-        sum += a[i];
-    }
-    return (double)sum / n;
+	float sum = 0;
+	for (int i = 0; i < n; i++) {
+		sum += a[i];
+	}
+	return (double)sum / n;
+}
+
+void console() {
+	AllocConsole();
+	ShowWindow(GetConsoleWindow(), SW_SHOW);
+	FILE* fDummy;
+	freopen_s(&fDummy, "CONIN$", "r", stdin);
+	freopen_s(&fDummy, "CONOUT$", "w", stderr);
+	freopen_s(&fDummy, "CONOUT$", "w", stdout);
+}
+
+void saveClicks() {
+	std::string name = vars::fName;
+	std::string fileName = name + ".txt";
+
+	if (menu::saveType == 0) {
+		std::ofstream myfile(fileName);
+		if (myfile.is_open())
+		{
+			std::cout << "saving " << fileName;
+			for (int i = 0; i < menu::totalClicks; i++) {
+				myfile << vars::recordedClicks[i] << "\n";
+			}
+			myfile.close();
+		}
+	}
+	else {
+		std::ofstream myfile(fileName, std::ios_base::app);
+		if (myfile.is_open())
+		{
+			std::cout << "appending " << fileName;
+			for (int i = 0; i < menu::totalClicks; i++) {
+				myfile << vars::recordedClicks[i] << "\n";
+			}
+			myfile.close();
+		}
+	}
+}
+
+void loadCps(std::string filename) {
+	std::fill(vars::loadedClicks, vars::loadedClicks + 5000, 0);
+	std::ifstream ms;
+
+	ms.open(filename);
+
+	int n = 0;
+	while (ms >> vars::loadedClicks[n]) {
+		vars::cpsTemp[n] = vars::loadedClicks[n];
+		n++;
+		Sleep(0.05);
+	}
+	vars::amountClicks = n;
+
+	vars::averageCpsL = average(vars::loadedClicks, n);
+	vars::averageCpsR = vars::averageCpsL;
+
+	std::cout << "\n" << vars::averageCpsL;
+	std::cout << "\n" << vars::averageCpsR;
+
+	ms.close();
+}
+
+void resetClicks() {
+	std::cout << menu::totalClicks;
+	for (int i = 0; menu::totalClicks > i; i++) {
+		vars::recordedClicks[i] = 0;
+	}
+	menu::totalClicks = 0;
 }
 
 bool CreateDeviceD3D(HWND hWnd)

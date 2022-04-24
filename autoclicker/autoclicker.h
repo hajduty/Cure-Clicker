@@ -9,6 +9,7 @@ void clickThreads();
 void loadCps(std::string filename);
 void calcClicks();
 void shuffleClicks();
+void arrayWidth();
 
 namespace invcheck { // From b1scoito's clicker https://github.com/b1scoito/clicker
 	inline std::mt19937 mersenne{ static_cast<std::mt19937::result_type>(std::time(nullptr)) };

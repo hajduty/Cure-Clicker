@@ -32,34 +32,75 @@ ImFont* smallfont;
 ImFont* bigfont;
 ImFont* bigsmallfont;
 
-static void showOverlay(bool* p_open)
+ImVec4 test = ImVec4(0.15f, 0.00f, 0.00f, 0.94f);
+ImVec4 icolor = ImVec4(0.15f, 0.00f, 0.00f, 0.94f);
+ImVec4 warn = ImVec4(1.f, 1.f, 1.f, 1.f);
+ImVec4 test2 = ImVec4(0.15f, 0.15f, 0.15f, 1.f);
+
+static void showManipulate(bool* p_open) {
+    ImGuiIO& io = ImGui::GetIO();
+    ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoResize;
+
+    ImGui::SetNextWindowPos(ImVec2(menu::screen[0] / 2, menu::screen[1] / 3), ImGuiCond_Once, ImVec2(0.5f, 0.5f));
+    ImGui::SetNextWindowSize({ 250.f,250.f });
+
+    if (!menu::graph)
+        *p_open = !*p_open;
+
+    if (ImGui::Begin("Manipulate Clicks", p_open, window_flags))
+    {
+        ImGui::SetCursorPos({ 30.f,40.f });
+        ImGui::PushStyleColor(ImGuiCol_ChildBg, test);
+        if (ImGui::BeginChild("##SLIDERS", { 190,90 })) {
+            ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 5.f);
+            ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 5.f);
+            ImGui::SetCursorPos({ 20,10 });
+            ImGui::PushItemWidth(80);
+            ImGui::SliderInt("Max", &vars::widthMax, 1, 1000);
+            ImGui::SetCursorPos({ 20,40 });
+            ImGui::SliderInt("Min", &vars::widthMin, 1, 1000);
+            ImGui::PopItemWidth();
+            ImGui::PopStyleVar(2);
+            ImGui::PopStyleColor();
+        }
+        ImGui::EndChild();
+        ImGui::SetCursorPos({ 60.f,170.f });
+        if (ImGui::Button("Widen", { 60.f,25.f })) {
+            menu::graph = !menu::graph;
+            menu::graph = !menu::graph;
+            arrayWidth();
+        }
+        ImGui::SetCursorPos({ 120.f,170.f });
+        if (ImGui::Button("Reset", { 60.f,25.f })) {
+            std::copy(std::begin(vars::defaultClicksTemp), std::end(vars::defaultClicksTemp), std::begin(prearray::defaultClicks));
+            std::copy(std::begin(vars::butterflyClicksTemp), std::end(vars::butterflyClicksTemp), std::begin(prearray::butterflyClicks));
+        }
+    }
+    ImGui::End();
+}
+
+static void showWatermark(bool* p_open)
 {
     ImGuiIO& io = ImGui::GetIO();
-    ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoDecoration;
+    ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoDecoration;
 
-    ImGui::SetNextWindowSize({ 190.f,40 });
+    ImGui::SetNextWindowSize({ 190.f,35 });
 
     if (ImGui::Begin("###", p_open, window_flags))
     {
         ImGui::SetCursorPos({ 0.f,0.f });
-        ImGui::BeginChild("##Text", { 75,40 });
+        ImGui::BeginChild("##Text", { 67,35 });
         ImGui::PushFont(bigsmallfont);
-        ImGui::SetCursorPos({ 9.f,-7.f });
+        ImGui::SetCursorPos({ 12.f,-3.f });
         ImGui::Text("CURE");
         ImGui::PopFont();
         ImGui::EndChild();
         ImGui::PushFont(smallfont);
         std::string cps = "CPS: " + std::to_string(1000 / (menu::cps + 1) / 2);
-        //std::string clicks = "POS: " + std::to_string(vars::crntLeftclick);
-        //std::string shuffles = "SHUFFLES: " + std::to_string(menu::shuffles);
         std::string sessionclicks = std::to_string(vars::sessionClicks) + " clicks this session.";
-        ImGui::SetCursorPos({ 95.f,5.f });
-        //ImGui::Text(shuffles.c_str());
-        //ImGui::SetCursorPos({ 95.f,20.f });
-        //ImGui::Text(clicks.c_str());
-        ImGui::SetCursorPos({ 77.5,5.f });
+        ImGui::SetCursorPos({ 69.5,5.f });
         ImGui::Text(cps.c_str());
-        ImGui::SetCursorPos({ 77.5,20.f });
+        ImGui::SetCursorPos({ 69.5,20.f });
         ImGui::Text(sessionclicks.c_str());
         ImGui::PopFont();
     }
@@ -74,6 +115,12 @@ static void showGraph(bool* p_open) {
 
         if (ImPlot::BeginPlot(" ")) {
 
+            ImVec2 h1 = ImPlot::PlotToPixels(ImPlotPoint(2000, vars::widthMin));
+            ImVec2 h2 = ImPlot::PlotToPixels(ImPlotPoint(0, vars::widthMin));
+
+            ImVec2 m1 = ImPlot::PlotToPixels(ImPlotPoint(2000, vars::widthMax));
+            ImVec2 m2 = ImPlot::PlotToPixels(ImPlotPoint(0, vars::widthMax));
+
             ImVec2 l1 = ImPlot::PlotToPixels(ImPlotPoint(vars::crntLeftclick, 200));
             ImVec2 l2 = ImPlot::PlotToPixels(ImPlotPoint(vars::crntLeftclick,-50));
 
@@ -86,84 +133,17 @@ static void showGraph(bool* p_open) {
 
             ImPlot::GetPlotDrawList()->AddLine(l1, l2, IM_COL32(255, 0, 0, 255), 2);
             ImPlot::GetPlotDrawList()->AddLine(r1, r2, IM_COL32(0, 255, 0, 255), 2);
+            ImPlot::GetPlotDrawList()->AddLine(h1, h2, IM_COL32(255, 150, 0, 255), 2);
+            ImPlot::GetPlotDrawList()->AddLine(m1, m2, IM_COL32(255, 150, 0, 255), 2);
 
             ImPlot::EndPlot();
         }
         ImGui::SetCursorPos({ 0.f, 310.f });
-        if (ImGui::Button("CLOSE", { 600.f, 40.f })) {
-            *p_open = false;
-            std::cout << "Graph closed\n";
+        if (ImGui::Button("Close", { 600.f, 40.f })) {
+            *p_open = !*p_open;
         }
         ImGui::End();
     }
-}
-
-void console() {
-    AllocConsole();
-    ShowWindow(GetConsoleWindow(), SW_SHOW);
-    FILE* fDummy;
-    freopen_s(&fDummy, "CONIN$", "r", stdin);
-    freopen_s(&fDummy, "CONOUT$", "w", stderr);
-    freopen_s(&fDummy, "CONOUT$", "w", stdout);
-}
-
-void saveClicks() {
-    std::string name = vars::fName;
-    std::string fileName = name + ".txt";
-
-    if (menu::saveType == 0) {
-        std::ofstream myfile(fileName);
-        if (myfile.is_open())
-        {
-            std::cout << "saving " << fileName;
-            for (int i = 0; i < menu::totalClicks; i++) {
-                myfile << vars::recordedClicks[i] << "\n";
-            }
-            myfile.close();
-        }
-    }
-    else {
-        std::ofstream myfile(fileName, std::ios_base::app);
-        if (myfile.is_open())
-        {
-            std::cout << "appending " << fileName;
-            for (int i = 0; i < menu::totalClicks; i++) {
-                myfile << vars::recordedClicks[i] << "\n";
-            }
-            myfile.close();
-        }
-    }
-}
-
-void loadCps(std::string filename) {
-    std::fill(vars::loadedClicks, vars::loadedClicks+5000, 0);
-    std::ifstream ms;
-
-    ms.open(filename);
-
-    int n = 0;
-    while (ms >> vars::loadedClicks[n]) {
-        vars::cpsTemp[n] = vars::loadedClicks[n];
-        n++;
-        Sleep(0.05);
-    }
-    vars::amountClicks = n;
-
-    vars::averageCpsL = average(vars::loadedClicks, n);
-    vars::averageCpsR = vars::averageCpsL;
-
-    std::cout << "\n" << vars::averageCpsL;
-    std::cout << "\n" << vars::averageCpsR;
-
-    ms.close();
-}
-
-void resetClicks() {
-    std::cout << menu::totalClicks;
-    for (int i = 0; menu::totalClicks > i; i++) {
-        vars::recordedClicks[i] = 0;
-    }
-    menu::totalClicks = 0;
 }
 
 // using noteffex imgui base
@@ -171,7 +151,7 @@ void resetClicks() {
 int APIENTRY WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 {
 
-    LPCSTR wndwName = "n";
+    LPCSTR wndwName = "name";
 
     // Create application window
     WNDCLASSEX wc = { sizeof(WNDCLASSEX), CS_CLASSDC, WndProc, 0L, 0L, GetModuleHandle(NULL), NULL, NULL, NULL, NULL, wndwName, NULL };
@@ -218,7 +198,7 @@ int APIENTRY WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
     ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\Arial.ttf", 18.0f, NULL, io.Fonts->GetGlyphRangesJapanese());
     ImFont* bigfont1 = io.Fonts->AddFontFromMemoryTTF(&anfont, sizeof anfont, 144.f);
     bigfont = io.Fonts->AddFontFromMemoryTTF(&anfont, sizeof anfont,58.f);
-    bigsmallfont = io.Fonts->AddFontFromMemoryTTF(&anfont, sizeof anfont, 48.f);
+    bigsmallfont = io.Fonts->AddFontFromMemoryTTF(&anfont, sizeof anfont, 38.f);
     ImFont* normalfont = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\Arial.ttf", 16.f);
     ImFont* mediumfont = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\Arial.ttf", 14.f);
     smallfont = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\Arial.ttf", 12.f);
@@ -247,6 +227,7 @@ int APIENTRY WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
     GetDesktopResolution();
 
+
     // load imgui style
 
     // Load Fonts
@@ -263,10 +244,6 @@ int APIENTRY WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
     while (msg.message != WM_QUIT)
     {
         // style options
-        ImVec4 test = ImVec4(0.15f, 0.00f, 0.00f, 0.94f);
-        ImVec4 icolor = ImVec4(0.15f, 0.00f, 0.00f, 0.94f);
-        ImVec4 warn = ImVec4(1.f, 1.f, 1.f, 1.f);
-        ImVec4 test2 = ImVec4(0.15f, 0.15f, 0.15f, 1.f);
         float anim = tab1 + tab2 + tab3 + tab4;
         if (menu::style == 0) {
             HLTheme();
@@ -293,9 +270,11 @@ int APIENTRY WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
         ImGui_ImplWin32_NewFrame();
         ImGui::NewFrame();
         {
+            if (menu::manipulate)
+                showManipulate(&menu::manipulate);
 
-            if (vars::overlay)
-                showOverlay(&vars::overlay);
+            if (menu::watermark)
+                showWatermark(&menu::watermark);
 
             if (menu::graph)
                 showGraph(&menu::graph);
@@ -311,7 +290,7 @@ int APIENTRY WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
                 ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 12.f);
                 ImGui::PushFont(font);
 
-                ImGui::Begin("Cure", 0, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoDecoration | ImGuiViewportFlags_NoTaskBarIcon);
+                ImGui::Begin("name", 0, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoDecoration);
 
                 ImGui::SetCursorPos({ 425,5 });
                 ImGui::PushFont(smallfont);
@@ -507,7 +486,7 @@ int APIENTRY WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
                 if (menu::tab == 1) {
 
                     //Child 0
-                    ImGui::SetCursorPos({ 350.f, 40.f });
+                    ImGui::SetCursorPos({ 340.f, 40.f });
 
                     tab2 = 0;
                     tab3 = 0;
@@ -517,7 +496,7 @@ int APIENTRY WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
                     ImGui::PushStyleColor(ImGuiCol_ChildBg, test);
                     ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 4.f);
-                    ImGui::BeginChild("childbtns", { 80.f , 185.f }, true, ImGuiWindowFlags_NoDecoration);
+                    ImGui::BeginChild("childbtns", { 90.f , 185.f }, true, ImGuiWindowFlags_NoDecoration);
                     ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 6.f);
                     ImGui::SetCursorPos({ 5,7 });
                     ImGui::PushFont(mediumfont);
@@ -537,7 +516,7 @@ int APIENTRY WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
                     if (ImGui::IsItemHovered()) { ImGui::SetTooltip("Allows eating while rightclicking (Might flag)"); } 
 
                     ImGui::SetCursorPos({ 5,112 });
-                    if (ImGui::Checkbox("Overlay", &vars::overlay)) {
+                    if (ImGui::Checkbox("Watermark", &menu::watermark)) {
                         //rpc
                     }
                     if (ImGui::IsItemHovered()) { ImGui::SetTooltip("Shows a small window with cps info"); }
@@ -558,7 +537,7 @@ int APIENTRY WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
                     //Child 1
                     ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 6.f);
                     ImGui::PushStyleColor(ImGuiCol_ChildBg, test);
-                    ImGui::SetCursorPos({ 135.f, 40.f });
+                    ImGui::SetCursorPos({ 125.f, 40.f });
                     if (menu::rand == 1)
                         ImGui::OpenPopup("WARNING");
                     if (menu::rand == 1 && vars::amountClicks == 0) {
@@ -580,7 +559,7 @@ int APIENTRY WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
                         }
                     }
                     ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 6.f);
-                    ImGui::SetCursorPos({ 135.f, 40.f });
+                    ImGui::SetCursorPos({ 125.f, 40.f });
                     ImGui::BeginChild("childLeft", { 205.f,85.f }, true);
                     ImGui::SetCursorPos({ 5.f,5.f });
                     ImGui::Text("Leftclicker");
@@ -599,7 +578,7 @@ int APIENTRY WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
                     ImGui::EndChild();
 
                     ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 6.f);
-                    ImGui::SetCursorPos({ 135.f, 140.f });
+                    ImGui::SetCursorPos({ 125.f, 140.f });
                     ImGui::BeginChild("childRight", { 205.f,85.f }, true);
                     ImGui::SetCursorPos({ 5.f,5.f });
                     ImGui::Text("Rightclicker");
@@ -615,70 +594,41 @@ int APIENTRY WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
                     ImGui::EndChild();
 
-                    if (menu::rand == 4) {
-
-                        ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 6.f);
-
-                        ImGui::BeginChild("childLeft", { 205.f,110.f }, true);
-                        ImGui::SetCursorPos({ 5.f,5.f });
-                        ImGui::Text("Left Enabled");
-                        ImGui::SetCursorPos({ 110.f,5.f });
-                        ImGui::Checkbox("", &vars::lEnabled);
-
-                        ImGui::SetCursorPos({ 5.f, 30.f });
-                        ImGui::PushItemWidth(130);
-                        ImGui::SliderFloat("Max cps", &menu::maxCps, 0, menu::cpsLimit);
-                        ImGui::SetCursorPos({ 5.f, 55.f });
-                        ImGui::SliderFloat("Min cps", &menu::minCps, 0, menu::maxCps);
-                        ImGui::SetCursorPos({ 5.f, 80.f });
-                        ImGui::SliderFloat("Blockhit", &vars::blockhit, 0, 100);
-                        ImGui::PopItemWidth();
-
-                        ImGui::EndChild();
-
-                        ImGui::SetCursorPos({ 135.f, 170.f });
-                        ImGui::BeginChild("childRight", { 205.f,85.f }, true);
-                        ImGui::SetCursorPos({ 5.f,5.f });
-                        ImGui::Text("Right Enabled");
-                        ImGui::SetCursorPos({ 110.f,5.f });
-                        ImGui::Checkbox("", &vars::rEnabled);
-
-                        ImGui::SetCursorPos({ 5.f, 30.f });
-                        ImGui::PushItemWidth(130);
-                        ImGui::SliderFloat("Boost", &vars::rightBoost, 0, 10);
-                        ImGui::SetCursorPos({ 5.f, 60.f });
-                        ImGui::PopItemWidth();
-
-
-                        ImGui::EndChild();
-
-                        ImGui::PopStyleVar();
-                    }
-
                     ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 5.f);
                     ImGui::PushStyleColor(ImGuiCol_Button, test);
-                    ImGui::SetCursorPos({ 282.5, 237.f });
+
+                    ImGui::SetCursorPos({ 300.5, 237.f });
+                    if (ImGui::Button("##MANIPULATE", { 30.f,30.f })) { //ICON_FA_CHART_LINE
+                        menu::graph = true;
+                        menu::manipulate = !menu::manipulate;
+                    }
+                    if (ImGui::IsItemHovered()) { ImGui::SetTooltip("Manipulate clicks"); }
+
+                    ImGui::SetCursorPos({ 262.5, 237.f });
                     if (ImGui::Button("##GRAPH", { 30.f,30.f })) { //ICON_FA_CHART_LINE
                         
                         for (int i = 0; i < vars::amountClicks; i++) {
                             vars::cpsTemp[i] = vars::loadedClicks[i] / vars::leftBoost;
                         }
-
+                        
                         menu::graph = !menu::graph;
                     }
                     if (ImGui::IsItemHovered()) { ImGui::SetTooltip("Show clicks graph"); }
 
-                    ImGui::SetCursorPos({ 244.5, 237.f });
+                    ImGui::SetCursorPos({ 224.5, 237.f });
                     if (ImGui::Button("##SHUFFLE", { 30.f,30.f })) { //ICON_FA_RECYCLE
                         shuffleClicks();
                     }
                     if (ImGui::IsItemHovered()) { ImGui::SetTooltip("Shuffle click locations"); }
+
                     ImGui::PushFont(smallfont);
                     ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.50f, 0.50f, 0.50f, 0.80f));
-                    ImGui::SetCursorPos({ 250, 250.5 });
+                    ImGui::SetCursorPos({ 230, 250.5 });
                     ImGui::Text(ICON_FA_RECYCLE"");
-                    ImGui::SetCursorPos({ 288.5, 249.5 });
+                    ImGui::SetCursorPos({ 268.5, 249.5 });
                     ImGui::Text(ICON_FA_CHART_PIE"");
+                    ImGui::SetCursorPos({ 306, 248.5 });
+                    ImGui::Text(ICON_FA_SLIDERS_H"");
                     ImGui::PopFont();
 
                     ImGui::PopStyleColor(3);
@@ -799,12 +749,13 @@ int APIENTRY WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
                     ImGui::SetCursorPos({ 0.f,30.f });
                     ImGui::PushItemWidth(185);
                     ImGui::SliderInt("##", &menu::style, 0, 1, "##");
+                    ImGui::SetCursorPos({ 0.f,60.f });
 
                     static const char* rands[]{ "Default 2K", "Custom", "Butterfly 1K" }; 
 
                     ImGui::SetCursorPos({ 40.f, 107.f });
                     ImGui::Text("Randomisation");
-                    ImGui::SetCursorPos({ 0.f, 132.f });
+                    ImGui::SetCursorPos({ 0.f, 130.f });
                     ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 6.f);
                     ImGui::ListBox("", &menu::rand, rands, IM_ARRAYSIZE(rands), 3);
                     ImGui::PopStyleVar();
@@ -891,7 +842,15 @@ int APIENTRY WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
                 ImGui::End();
                 ImGui::PopFont();
                 ImGui::SetNextWindowPos(ImVec2(menu::screen[0] / 1.75, menu::screen[1] / 2), ImGuiCond_Once, ImVec2(0.5f, 0.5f));
+                ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.0f, 1.0f, 1.0f, 0.10f));
+                ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.0f, 0.0f, 0.0f, 0.15f));
+                ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.12f, 0.12f, 0.12f, 1.f));
+                ImGui::PushStyleColor(ImGuiCol_PopupBg, ImVec4(0.12f, 0.12f, 0.12f, 1.f));
+                ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.15f, 0.15f, 0.15f, 1.f));
+                ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(4.00f, 4.00f));
                 fileDialog.Display();
+                ImGui::PopStyleVar();
+                ImGui::PopStyleColor(5);
             }
         }
 
