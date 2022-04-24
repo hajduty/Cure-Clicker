@@ -39,22 +39,13 @@ int leftRando(int x) {
 
 void jitter() {
 	while (true) {
+		if (vars::jitter) {
+			if (inJava() && ScreenToClient(GetForegroundWindow(), &vars::pos) && (vars::lEnabled && GetAsyncKeyState(VK_LBUTTON)) | vars::lockL) {
+				mouse_event(MOUSEEVENTF_MOVE, invcheck::random_int(), invcheck::random_int(), 0, 0);
+				Sleep(leftRando(vars::crntLeftclick));
+			}
+		}
 		Sleep(1);
-
-		if (!vars::jitter)
-			continue;
-
-		if (!inJava())
-			continue;
-
-		if (!vars::lEnabled && !vars::lockL)
-			continue;
-
-		if (!GetAsyncKeyState(VK_LBUTTON))
-			continue;
-
-		mouse_event(MOUSEEVENTF_MOVE, invcheck::random_int(), invcheck::random_int(), 0, 0);
-		Sleep(leftRando(vars::crntLeftclick));
 	}
 }
 
@@ -79,8 +70,13 @@ void shuffleClicks() {
 
 bool is_cursor_visible() { //From Biscoito clicker 
 	if (vars::invOnly == 1)
-		return invcheck::cursor_visible() || (invcheck::inventory_opened && !invcheck::cursor_visible());
-
+	{
+		if (vars::invOnly == 1)
+		{
+			return invcheck::cursor_visible() || (invcheck::inventory_opened && !invcheck::cursor_visible());
+		}
+		return invcheck::cursor_visible();
+	}
 	return true;
 }
 // gets next rightclick cps value from selected array
@@ -316,8 +312,9 @@ void calcClicks() {
 			menu::time2Total = time() - captureTime2;
 			int totalTime = menu::time2Total - menu::time1Total;
 			menu::ms = totalTime;
+			//menu::cps = 1000 / totalTime;
 
-			if (menu::ms < menu::msLimitMax) {
+			if (menu::ms < menu::msLimit) {
 				vars::recordedClicks[menu::totalClicks] = menu::ms;
 				std::cout << vars::recordedClicks[menu::totalClicks] << std::endl;
 			}
@@ -330,8 +327,10 @@ void calcClicks() {
 		menu::click = 2;
 		menu::time1Total = time() - captureTime1;
 		int totalTime = menu::time1Total - menu::time2Total;
-		if (totalTime > menu::msLimitMin) {
+		if (totalTime > 20) {
+			std::cout << "MS: " << totalTime << "  |   CPS: " << 1000 / totalTime << "\n";
 			menu::ms = totalTime;
+			menu::cps = 1000 / totalTime;
 		}
 	}
 }
