@@ -23,35 +23,45 @@
 #include "autoclicker/2kpre.h"
 #include "fonts/fa_solid_900.h"
 
-#pragma comment(lib, "dwmapi.lib")
-#include "Dwmapi.h"
-
 static float tab1 = 0.f;
 static float tab2 = 0.f;
 static float tab3 = 0.f;
 static float tab4 = 0.f;
 
+ImFont* smallfont;
+ImFont* bigfont;
+ImFont* bigsmallfont;
+
 static void showOverlay(bool* p_open)
 {
     ImGuiIO& io = ImGui::GetIO();
-    ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav;
+    ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoDecoration;
 
-    ImGui::SetNextWindowSize({ 140.f,100.f });
+    ImGui::SetNextWindowSize({ 190.f,40 });
 
     if (ImGui::Begin("###", p_open, window_flags))
     {
-       std::string cps = "Cps: " + std::to_string(1000 / (menu::cps+1) / 2);
-       std::string clicks = "Pos: " + std::to_string(vars::crntLeftclick);
-       std::string shuffles = "Shuffles: " + std::to_string(menu::shuffles);
-       std::string sessionclicks = std::to_string(vars::sessionClicks) + " clicks this session.";
-
-       ImGui::Text(shuffles.c_str());
-       ImGui::Separator();
-       ImGui::Text(clicks.c_str());
-       ImGui::Separator();
-       ImGui::Text(cps.c_str());
-       ImGui::Separator();
-       ImGui::Text(sessionclicks.c_str());
+        ImGui::SetCursorPos({ 0.f,0.f });
+        ImGui::BeginChild("##Text", { 75,40 });
+        ImGui::PushFont(bigsmallfont);
+        ImGui::SetCursorPos({ 9.f,-8.f });
+        ImGui::Text("CURE");
+        ImGui::PopFont();
+        ImGui::EndChild();
+        ImGui::PushFont(smallfont);
+        std::string cps = "CPS: " + std::to_string(1000 / (menu::cps + 1) / 2);
+        //std::string clicks = "POS: " + std::to_string(vars::crntLeftclick);
+        //std::string shuffles = "SHUFFLES: " + std::to_string(menu::shuffles);
+        std::string sessionclicks = std::to_string(vars::sessionClicks) + " clicks this session.";
+        ImGui::SetCursorPos({ 95.f,5.f });
+        //ImGui::Text(shuffles.c_str());
+        //ImGui::SetCursorPos({ 95.f,20.f });
+        //ImGui::Text(clicks.c_str());
+        ImGui::SetCursorPos({ 77.5,5.f });
+        ImGui::Text(cps.c_str());
+        ImGui::SetCursorPos({ 77.5,20.f });
+        ImGui::Text(sessionclicks.c_str());
+        ImGui::PopFont();
     }
     ImGui::End();
 }
@@ -207,10 +217,11 @@ int APIENTRY WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
     ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\Arial.ttf", 18.0f, NULL, io.Fonts->GetGlyphRangesJapanese());
     ImFont* bigfont1 = io.Fonts->AddFontFromMemoryTTF(&anfont, sizeof anfont, 144.f);
-    ImFont* bigfont = io.Fonts->AddFontFromMemoryTTF(&anfont, sizeof anfont,58.f);
+    bigfont = io.Fonts->AddFontFromMemoryTTF(&anfont, sizeof anfont,58.f);
+    bigsmallfont = io.Fonts->AddFontFromMemoryTTF(&anfont, sizeof anfont, 48.f);
     ImFont* normalfont = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\Arial.ttf", 16.f);
     ImFont* mediumfont = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\Arial.ttf", 14.f);
-    ImFont* smallfont = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\Arial.ttf", 12.f);
+    smallfont = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\Arial.ttf", 12.f);
 
     io.Fonts->AddFontFromMemoryCompressedTTF(font_awesome_data, font_awesome_size, 20.0f, &icons_config, icons_ranges);
     io.Fonts->AddFontDefault();
@@ -687,7 +698,7 @@ int APIENTRY WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
                     ImGui::SetCursorPos({ 125.f,80.f });
                     ImGui::PushItemWidth(85);
-                    ImGui::SliderInt("Limit", &menu::msLimit, 0, 2000);
+                    ImGui::SliderInt("Limit", &menu::msLimitMax, 0, 2000);
                     if (ImGui::IsItemHovered()) { ImGui::SetTooltip("Limits the max threshold for click-times"); }
                     ImGui::PopItemWidth();
 
