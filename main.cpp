@@ -23,13 +23,41 @@
 #include "autoclicker/2kpre.h"
 #include "fonts/fa_solid_900.h"
 
+#pragma comment(lib, "dwmapi.lib")
+#include "Dwmapi.h"
+
 static float tab1 = 0.f;
 static float tab2 = 0.f;
 static float tab3 = 0.f;
 static float tab4 = 0.f;
 
-void showGraph() {
-    if (menu::graph && !menu::hide) {
+static void ShowExampleAppSimpleOverlay(bool* p_open)
+{
+    ImGuiIO& io = ImGui::GetIO();
+    ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav;
+
+    //ImGui::SetNextWindowBgAlpha(0.35f); // Transparent background
+
+    ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0, 0, 0, 0));
+    ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0, 0, 0, 0));
+    ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0, 0, 0, 0));
+    if (ImGui::Begin("Example: Simple overlay", p_open, window_flags))
+    {
+        ImGui::Text("Simple overlay\n" "in the corner of the screen.\n" "(right-click to change position)");
+        ImGui::Separator();
+
+        if (ImGui::BeginPopupContextWindow())
+        {
+            if (p_open && ImGui::MenuItem("Close")) *p_open = false;
+            ImGui::EndPopup();
+        }
+    }
+    ImGui::End();
+    ImGui::PopStyleColor(3);
+}
+
+void showGraph(bool* p_open) {
+    if (!menu::hide) {
         ImGui::SetNextWindowSize({ 600.f,350.f });
         ImGui::Begin("CPS GRAPH", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize);
         ImGui::SetCursorPos({ 0.f, 10.f });
@@ -151,6 +179,7 @@ int APIENTRY WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
     ShowWindow(main_hwnd, SW_HIDE);
     UpdateWindow(main_hwnd);
 
+
     // Setup Dear ImGui context
     ImGui::CreateContext();
     ImPlot::CreateContext();
@@ -203,7 +232,7 @@ int APIENTRY WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
     // start reach threads
 
-    CreateThread(0, 0, (LPTHREAD_START_ROUTINE)console, 0, 0, 0);
+    //CreateThread(0, 0, (LPTHREAD_START_ROUTINE)console, 0, 0, 0);
 
     GetDesktopResolution();
 
@@ -254,6 +283,12 @@ int APIENTRY WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
         ImGui::NewFrame();
         {
             if (menu::hide == false) {
+
+                if (vars::overlay)
+                    ShowExampleAppSimpleOverlay(&vars::overlay);
+
+                if (menu::graph)
+                    showGraph(&menu::graph);
 
                 
                 ImGui::SetNextWindowPos(ImVec2(menu::screen[0] / 3.25, menu::screen[1] / 2), ImGuiCond_Once, ImVec2(0.5f, 0.5f)); // ImGui::GetWindowSize().x doesnt work
@@ -478,9 +513,10 @@ int APIENTRY WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
                     if (ImGui::IsItemHovered()) { ImGui::SetTooltip("Allows eating while rightclicking (Might flag)"); } 
 
                     ImGui::SetCursorPos({ 5,112 });
-                    if (ImGui::Checkbox("Discord", &vars::discord)) {
+                    if (ImGui::Checkbox("Overlay", &vars::overlay)) {
                         //rpc
                     }
+                    if (ImGui::IsItemHovered()) { ImGui::SetTooltip("Shows a small window with cps info"); }
 
                     ImGui::SetCursorPos({ 5,133 });
                     ImGui::Checkbox("Lock L", &vars::lockL);
@@ -610,7 +646,7 @@ int APIENTRY WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
                     ImGui::SetCursorPos({ 244.5, 237.f });
                     if (ImGui::Button("##SHUFFLE", { 30.f,30.f })) { //ICON_FA_RECYCLE
-                        shuffleArr();
+                        shuffleClicks();
                     }
                     if (ImGui::IsItemHovered()) { ImGui::SetTooltip("Shuffle click locations"); }
                     ImGui::PushFont(smallfont);
@@ -625,8 +661,6 @@ int APIENTRY WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
                     ImGui::PopStyleVar(2);
 
                 }
-
-                showGraph();
 
                 if (menu::tab == 2) {
 
@@ -892,7 +926,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
         return 0;
 
     case WM_SYSCOMMAND:
-        if ((wParam & 0xfff0) == SC_KEYMENU) // Disable ALT application menu
+        if ((wParam & 0xfff0) == SC_KEYMENU)
             return 0;
         break;
 

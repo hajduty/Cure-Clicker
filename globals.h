@@ -10,7 +10,7 @@ namespace vars
 	inline bool jitter = false;						// JITTER TOGGLE
 	inline bool lockL = false;						// LOCK LEFT CLICKER (ALWAYS CLICK)
 	inline int amountClicks;						// AMOUNT OF CLICKS IN LOADED TXT FILE
-	inline bool discord = false;					// RPC
+	inline bool overlay = false;					// RPC
 	inline static char fName[128] = "filename";		// SAVE FILENAME
 	inline int sessionClicks;						// CLICKS THIS SESSION
 	inline double averageCpsL;						// AVERAGE LEFT CPS
@@ -64,7 +64,7 @@ namespace menu
 	inline bool graph = false;						// GRAPH TOGGLE
 	inline bool des = false;						// DESTRUCT MENU TOGGLE
 	inline int click = 1;							// ?
-	inline int msLimit = 800;						// MS LIMIT WHEN RECORDING CLICKS
+	inline int msLimit = 2000;						// MS LIMIT WHEN RECORDING CLICKS
 	inline int time1Total = 1;						// TIME WHEN FIRST CLICK (in milliseconds)
 	inline int time2Total = 1;						// TIME WHEN SECOND CLICK (in milliseconds) 
 	inline int ms = 0;								// THE TIME BETWEEN FIRST AND SECOND CLICK

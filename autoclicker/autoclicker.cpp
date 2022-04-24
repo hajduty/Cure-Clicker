@@ -46,7 +46,7 @@ void jitter() {
 	}
 }
 
-void shuffleArr() {
+void shuffleClicks() {
 	// To obtain a time-based seed
 	unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
 
@@ -160,8 +160,10 @@ void sendLeft(int currentClick) {
 }
 
 void leftClickThread() {
-	int currentLeftClick = 1900;
 	while (true) {
+
+		Sleep(10);
+
 		if (menu::rand == 0)
 			vars::currentClickAmount = 2000;
 		if (menu::rand == 1)
@@ -170,55 +172,57 @@ void leftClickThread() {
 			vars::currentClickAmount = 1469;
 		
 		if (vars::lEnabled | vars::lockL)	
-			if ((currentLeftClick + 1) >= vars::currentClickAmount) {
-				currentLeftClick = 0;
-				shuffleArr();
+			if ((vars::crntLeftclick + 1) >= vars::currentClickAmount) {
+				vars::crntLeftclick = 0;
+				shuffleClicks();
 			}
 
-		if (vars::lEnabled && is_cursor_visible() && inJava()) {
+		if (!is_cursor_visible())
+			continue;
 
+		if (!inJava())
+			continue;
+
+		if (vars::lEnabled) {
 			if (GetAsyncKeyState(VK_LBUTTON) & 0x8000) {
-				currentLeftClick += 1;
-				sendLeft(currentLeftClick);
-				//std::cout << leftRando(currentLeftClick) << " CRNTCLICK: " << currentLeftClick << "\n";
-				//std::cout << vars::currentClickAmount << currentLeftClick << "\n";
+				vars::crntLeftclick += 1;
+				sendLeft(vars::crntLeftclick);
 				vars::sessionClicks += 1;
 			}
 		}
 
-		if (vars::lockL && !vars::lEnabled && is_cursor_visible() && inJava()) {
-			currentLeftClick += 1;
-			sendLeft(currentLeftClick);
-			//std::cout << leftRando(currentLeftClick) << " CRNTCLICK: " << currentLeftClick << "\n";
+		if (vars::lockL && !vars::lEnabled) {
+			vars::crntLeftclick += 1;
+			sendLeft(vars::crntLeftclick);
 			vars::sessionClicks += 1;
 		}
-
-		vars::crntLeftclick = currentLeftClick;
-
-		Sleep(10);
 	}
 }
 
 void rightClickThread() {
-	int currentRightClick = { 0 };
 	while (true) {
 
-		if (vars::rEnabled)
-			if ((currentRightClick + 1) >= vars::currentClickAmount) {
-				currentRightClick = 0;
-				shuffleArr();
+		Sleep(10);
+
+		if (!is_cursor_visible())
+			continue;
+
+		if (!inJava())
+			continue;
+
+		if (!vars::rEnabled)
+			continue;
+
+			if ((vars::crntRightclick + 1) >= vars::currentClickAmount) {
+				vars::crntRightclick = 0;
+				shuffleClicks();
 			}
 
-		if (vars::rEnabled && is_cursor_visible() && inJava()) {
 			if (GetAsyncKeyState(VK_RBUTTON) & 0x8000) {
-				currentRightClick += 1;
-				sendRight(currentRightClick);
+				vars::crntRightclick += 1;
+				sendRight(vars::crntRightclick);
 				vars::sessionClicks += 1;
 			}
-		}
-
-		vars::crntRightclick = currentRightClick;
-		Sleep(10);
 	}
 }
 void bindThreads() {
