@@ -64,7 +64,8 @@ namespace menu
 	inline bool graph = false;						// GRAPH TOGGLE
 	inline bool des = false;						// DESTRUCT MENU TOGGLE
 	inline int click = 1;							// ?
-	inline int msLimit = 2000;						// MS LIMIT WHEN RECORDING CLICKS
+	inline int msLimitMax = 2000;					// MS LIMIT WHEN RECORDING CLICKS
+	inline int msLimitMin = 5;						// MS LIMIT WHEN RECORDING CLICKS
 	inline int time1Total = 1;						// TIME WHEN FIRST CLICK (in milliseconds)
 	inline int time2Total = 1;						// TIME WHEN SECOND CLICK (in milliseconds) 
 	inline int ms = 0;								// THE TIME BETWEEN FIRST AND SECOND CLICK
