@@ -20,8 +20,9 @@
 #include "imgui/imfilebrowser.h"
 #include "Main.h"
 #include "imgui/style.h"
-#include "autoclicker/2kpre.h"
+#include "autoclicker/clicks.h"
 #include "fonts/fa_solid_900.h"
+#include "autoclicker/misc.h"
 
 static float tab1 = 0.f;
 static float tab2 = 0.f;
@@ -49,32 +50,68 @@ static void showManipulate(bool* p_open) {
 
     if (ImGui::Begin("Manipulate Clicks", p_open, window_flags))
     {
-        ImGui::SetCursorPos({ 30.f,40.f });
-        ImGui::PushStyleColor(ImGuiCol_ChildBg, test);
-        if (ImGui::BeginChild("##SLIDERS", { 190,90 })) {
-            ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 5.f);
-            ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 5.f);
-            ImGui::SetCursorPos({ 20,10 });
-            ImGui::PushItemWidth(80);
-            ImGui::SliderInt("Max", &vars::widthMax, 1, 1000);
-            ImGui::SetCursorPos({ 20,40 });
-            ImGui::SliderInt("Min", &vars::widthMin, 1, 1000);
-            ImGui::PopItemWidth();
-            ImGui::PopStyleVar(2);
-            ImGui::PopStyleColor();
-        }
-        ImGui::EndChild();
-        ImGui::SetCursorPos({ 60.f,170.f });
-        if (ImGui::Button("Widen", { 60.f,25.f })) {
+        ImGui::SetCursorPos({ 30.f,180.f });
+        if (ImGui::Button("Widen", { 75.f,20.f }))
+        {
             menu::graph = !menu::graph;
             menu::graph = !menu::graph;
             arrayWidth();
         }
-        ImGui::SetCursorPos({ 120.f,170.f });
-        if (ImGui::Button("Reset", { 60.f,25.f })) {
+        if (ImGui::IsItemHovered()) { ImGui::SetTooltip("s"); }
+        if (ImGui::IsItemHovered()) { ImGui::SetTooltip(""); }
+        ImGui::SetCursorPos({ 30.f,210.f });
+        if (ImGui::Button("Reset", { 75.f,20.f }))
+        {
             std::copy(std::begin(vars::defaultClicksTemp), std::end(vars::defaultClicksTemp), std::begin(prearray::defaultClicks));
             std::copy(std::begin(vars::butterflyClicksTemp), std::end(vars::butterflyClicksTemp), std::begin(prearray::butterflyClicks));
         }
+        if (ImGui::IsItemHovered()) { ImGui::SetTooltip("resets array to original state"); }
+        ImGui::SetCursorPos({ 140.f,180.f });
+        if (ImGui::Button("Decrease", { 75.f,20.f }))
+        {
+            decrease();
+        }
+        std::string decreaseTooltip;
+        if (!vars::decreaseInvert)
+            decreaseTooltip = "everything OVER the max ms will get decreased by " + std::to_string(vars::decreaseBy);
+        else
+            decreaseTooltip = "everything UNDER the max ms will get decreased by " + std::to_string(vars::decreaseBy);
+
+        if (ImGui::IsItemHovered()) { ImGui::SetTooltip(decreaseTooltip.c_str()); }
+        ImGui::SetCursorPos({ 140.f,210.f });
+
+        ImGui::Checkbox("Invert", &vars::decreaseInvert);
+        std::string invertTooltip = "if enabled, everything UNDER the max ms will get decreased by" + std::to_string(vars::decreaseBy);
+        if (ImGui::IsItemHovered()) { ImGui::SetTooltip(invertTooltip.c_str()); }
+
+        ImGui::SetCursorPos({ 30.f,30.f });
+        
+        ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 5.f);
+        ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 3.5);
+        ImGui::PushStyleColor(ImGuiCol_ChildBg, test);
+        ImGui::BeginChild("child0", { 190.f,130.f }, true);
+
+        ImGui::SetCursorPos({ 17.f,25.f });
+        ImGui::PushItemWidth(120);
+        ImGui::SliderInt("max", &vars::widthMax , 0, 1000);
+        ImGui::PopItemWidth();
+        if (ImGui::IsItemHovered()) { ImGui::SetTooltip("(light blue color on graph)"); }
+
+        ImGui::SetCursorPos({ 17.f,55.f });
+        ImGui::PushItemWidth(120);
+        ImGui::SliderInt("min", &vars::widthMin, 0, 1000);
+        ImGui::PopItemWidth();
+        if (ImGui::IsItemHovered()) { ImGui::SetTooltip("(purple color on graph)"); }
+
+        ImGui::SetCursorPos({ 17.f,85.f });
+        ImGui::PushItemWidth(120);
+        ImGui::SliderInt("range", &vars::decreaseBy, -500, 500);
+        if (ImGui::IsItemHovered()) { ImGui::SetTooltip("how much to decrease by (negative values will add instead)"); }
+        ImGui::PopItemWidth();
+        ImGui::PopStyleColor();
+        ImGui::PopStyleVar(2);
+
+        ImGui::EndChild();
     }
     ImGui::End();
 }
@@ -133,8 +170,8 @@ static void showGraph(bool* p_open) {
 
             ImPlot::GetPlotDrawList()->AddLine(l1, l2, IM_COL32(255, 0, 0, 255), 2);
             ImPlot::GetPlotDrawList()->AddLine(r1, r2, IM_COL32(0, 255, 0, 255), 2);
-            ImPlot::GetPlotDrawList()->AddLine(h1, h2, IM_COL32(255, 150, 0, 255), 2);
-            ImPlot::GetPlotDrawList()->AddLine(m1, m2, IM_COL32(255, 150, 0, 255), 2);
+            ImPlot::GetPlotDrawList()->AddLine(h1, h2, IM_COL32(140, 20, 252, 255), 2);
+            ImPlot::GetPlotDrawList()->AddLine(m1, m2, IM_COL32(3, 138, 255, 255), 2);
 
             ImPlot::EndPlot();
         }
@@ -223,7 +260,7 @@ int APIENTRY WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
     // start reach threads
 
-    //CreateThread(0, 0, (LPTHREAD_START_ROUTINE)console, 0, 0, 0);
+    CreateThread(0, 0, (LPTHREAD_START_ROUTINE)console, 0, 0, 0);
 
     GetDesktopResolution();
 
@@ -461,11 +498,11 @@ int APIENTRY WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
                 ImGui::PopFont();
 
                 ImGui::PopStyleVar();
-                ImGui::SetCursorPos({ 45.f,63.f });
+                ImGui::SetCursorPos({ 41.f,63.f });
                 ImGui::PushItemWidth(42.000000);
                 ImGui::PushFont(smallfont);
                 ImGui::PushStyleColor(ImGuiCol_Text, icolor);
-                ImGui::Text("2.0");
+                ImGui::Text("2.0.3");
                 ImGui::PopStyleColor();
                 ImGui::PopFont();
                 ImGui::PopItemWidth();
@@ -558,6 +595,11 @@ int APIENTRY WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
                             ImGui::EndPopup();
                         }
                     }
+                    int avCpsL = 1000 / (vars::averageCps / vars::leftBoost);
+                    std::string cpsTooltipL = "(" + std::to_string(avCpsL) + " cps) Divides selected clicks by " + std::to_string(vars::leftBoost);
+                    int avCpsR = 1000 / (vars::averageCps / vars::rightBoost);
+                    std::string cpsTooltipR = "(" + std::to_string(avCpsR) + " cps) Divides selected clicks by " + std::to_string(vars::rightBoost);
+
                     ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 6.f);
                     ImGui::SetCursorPos({ 125.f, 40.f });
                     ImGui::BeginChild("childLeft", { 205.f,85.f }, true);
@@ -569,7 +611,7 @@ int APIENTRY WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
                     ImGui::SetCursorPos({ 5.f, 30.f });
                     ImGui::PushItemWidth(130);
                     ImGui::SliderFloat("Boost", &vars::leftBoost, 0.1, menu::maxBoost);
-                    if (ImGui::IsItemHovered()) { ImGui::SetTooltip("Divides selected clicks by"); }
+                    if (ImGui::IsItemHovered()) { ImGui::SetTooltip(cpsTooltipL.c_str()); }
                     ImGui::SetCursorPos({ 5.f, 55.f });
                     ImGui::SliderFloat("Blockhit", &vars::blockhit, 0, 100);
                     ImGui::PopItemWidth();
@@ -588,7 +630,7 @@ int APIENTRY WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
                     ImGui::SetCursorPos({ 5.f, 30.f });
                     ImGui::PushItemWidth(130);
                     ImGui::SliderFloat("Boost", &vars::rightBoost, 0, 10);
-                    if (ImGui::IsItemHovered()) { ImGui::SetTooltip("Divides selected clicks by"); }
+                    if (ImGui::IsItemHovered()) { ImGui::SetTooltip(cpsTooltipR.c_str()); }
                     ImGui::SetCursorPos({ 5.f, 60.f });
                     ImGui::PopStyleVar();
 

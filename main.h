@@ -12,6 +12,7 @@
 #include "imgui/imgui_impl_dx9.h"
 #include "imgui/imgui_impl_win32.h"
 #include "globals.h"
+#include "autoclicker/clicks.h"
 
 HWND main_hwnd = nullptr;
 
@@ -42,6 +43,9 @@ void console() {
 	freopen_s(&fDummy, "CONIN$", "r", stdin);
 	freopen_s(&fDummy, "CONOUT$", "w", stderr);
 	freopen_s(&fDummy, "CONOUT$", "w", stdout);
+	Sleep(500);
+	//std::cout << average(prearray::defaultClicks, 2000);	 // 146
+	//std::cout << average(prearray::butterflyClicks, 1469); // 89
 }
 
 void saveClicks() {
@@ -86,11 +90,9 @@ void loadCps(std::string filename) {
 	}
 	vars::amountClicks = n;
 
-	vars::averageCpsL = average(vars::loadedClicks, n);
-	vars::averageCpsR = vars::averageCpsL;
+	vars::averageCps = average(vars::loadedClicks, n);
 
-	std::cout << "\n" << vars::averageCpsL;
-	std::cout << "\n" << vars::averageCpsR;
+	std::cout << "\n" << vars::averageCps;
 
 	ms.close();
 }

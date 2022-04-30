@@ -2,20 +2,20 @@
 
 namespace vars
 {
+	inline bool decreaseInvert = false;
 	inline int defaultClicksTemp[2000];
 	inline int butterflyClicksTemp[1469];
 	inline bool recordGame = false;					// RECORD GAME
 	inline int crntLeftclick;						// CURRENT CLICK
 	inline int crntRightclick;						// CURRENT CLICK
-	inline float decreaseBy;						// DECREASE BY
+	inline int decreaseBy;						// DECREASE BY
 	inline float jrange = 3;						// JITTER RANGE
 	inline bool jitter = false;						// JITTER TOGGLE
 	inline bool lockL = false;						// LOCK LEFT CLICKER (ALWAYS CLICK)
 	inline int amountClicks;						// AMOUNT OF CLICKS IN LOADED TXT FILE
 	inline static char fName[128] = "filename";		// SAVE FILENAME
 	inline int sessionClicks;						// CLICKS THIS SESSION
-	inline double averageCpsL;						// AVERAGE LEFT CPS
-	inline double averageCpsR;						// AVERAGE RIGHT CPS
+	inline double averageCps;						// AVERAGE CPS
 	inline int cpsTemp[5000];						// TEMP ARRAY TO SHOW GRAPH
 	inline int loadedClicks[5000];					// LOADED CLICKS
 	inline int recordedClicks[5000];				// ALL CURRENT RECORDED CLICKS

@@ -2,7 +2,8 @@
 #include <random>
 #include <algorithm>
 #include "../globals.h"
-#include "2kpre.h"
+#include "clicks.h"
+#include "sounds.h"
 
 bool inJava() {
 	if (vars::mcOnly == 1) {
@@ -19,46 +20,10 @@ bool inJava() {
 	return true;
 }
 
-void arrayWidth() {
-	srand(time(0));
-	int ran = rand() % vars::widthRange + 1;
-	if (menu::rand == 0)
-		for (int i = 0; i < 2000; i++) {
-
-			if (prearray::defaultClicks[i] > vars::widthMax)
-				prearray::defaultClicks[i] += ran;
-
-			if (prearray::defaultClicks[i] < vars::widthMin)
-				prearray::defaultClicks[i] -= ran;
-		}
-	if (menu::rand == 1) {
-		for (int i = 0; i < 2000; i++) {
-
-			if (vars::loadedClicks[i] > vars::widthMax)
-				vars::loadedClicks[i] += ran;
-
-			if (vars::loadedClicks[i] < vars::widthMin)
-				vars::loadedClicks[i] -= ran;
-		}
-	}
-
-	if (menu::rand == 2) {
-		for (int i = 0; i < 2000; i++) {
-
-			if (prearray::butterflyClicks[i] > vars::widthMax)
-				prearray::butterflyClicks[i] += ran;
-
-			if (prearray::butterflyClicks[i] < vars::widthMin)
-				prearray::butterflyClicks[i] -= ran;
-		}
-	}
-
-}
-
 int leftRando(int x) {
 	if (menu::rand == 0) {
 		int xe = ((prearray::defaultClicks[x] / vars::leftBoost) / 2);
-		std::cout << xe;
+		std::cout << xe << "\n";
 		menu::cps = xe;
 		if (xe > 2)
 			return xe;
@@ -215,12 +180,17 @@ void leftClickThread() {
 
 		Sleep(10);
 
-		if (menu::rand == 0)
+		if (menu::rand == 0) {
 			vars::currentClickAmount = 2000;
-		if (menu::rand == 1)
+			vars::averageCps = 146;
+		}
+		if (menu::rand == 1) {
 			vars::currentClickAmount = vars::amountClicks;
-		if (menu::rand == 2)
+		}
+		if (menu::rand == 2) {
 			vars::currentClickAmount = 1469;
+			vars::averageCps = 89;
+		}
 		
 		if (vars::lEnabled | vars::lockL)	
 			if ((vars::crntLeftclick + 1) >= vars::currentClickAmount) {

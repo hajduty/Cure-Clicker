@@ -87,7 +87,7 @@
     <ClInclude Include="imgui\imfilebrowser.h">
       <Filter>imgui</Filter>
     </ClInclude>
-    <ClInclude Include="autoclicker\2kpre.h">
+    <ClInclude Include="autoclicker\clicks.h">
       <Filter>autoclicker</Filter>
     </ClInclude>
     <ClInclude Include="destruct\destruct.h">
@@ -108,6 +108,8 @@
     <ClInclude Include="fonts\fa_solid_900.h">
       <Filter>fonts</Filter>
     </ClInclude>
+    <ClInclude Include="autoclicker\sounds.h" />
+    <ClInclude Include="autoclicker\misc.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="imgui">

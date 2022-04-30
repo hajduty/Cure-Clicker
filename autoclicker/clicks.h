@@ -3478,6 +3478,6 @@ inline int butterflyClicks[1469]{
 	139,
 	84 ,
 	124,
-	71
+	71  
 };
 }
