@@ -29,6 +29,8 @@ static float tab2 = 0.f;
 static float tab3 = 0.f;
 static float tab4 = 0.f;
 
+int g = 1;
+
 ImFont* smallfont;
 ImFont* bigfont;
 ImFont* bigsmallfont;
@@ -38,8 +40,7 @@ ImVec4 icolor = ImVec4(0.15f, 0.00f, 0.00f, 0.94f);
 ImVec4 warn = ImVec4(1.f, 1.f, 1.f, 1.f);
 ImVec4 test2 = ImVec4(0.15f, 0.15f, 0.15f, 1.f);
 
-static void showManipulate(bool* p_open) {
-    ImGuiIO& io = ImGui::GetIO();
+static void showModify(bool* p_open) {
     ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoResize;
 
     ImGui::SetNextWindowPos(ImVec2(menu::screen[0] / 2, menu::screen[1] / 3), ImGuiCond_Once, ImVec2(0.5f, 0.5f));
@@ -53,17 +54,13 @@ static void showManipulate(bool* p_open) {
         ImGui::SetCursorPos({ 30.f,180.f });
         if (ImGui::Button("Widen", { 75.f,20.f }))
         {
-            menu::graph = !menu::graph;
-            menu::graph = !menu::graph;
             arrayWidth();
         }
-        if (ImGui::IsItemHovered()) { ImGui::SetTooltip("s"); }
-        if (ImGui::IsItemHovered()) { ImGui::SetTooltip(""); }
+        if (ImGui::IsItemHovered()) { ImGui::SetTooltip("if click > max, add to it. if click < min, decrease it."); }
         ImGui::SetCursorPos({ 30.f,210.f });
         if (ImGui::Button("Reset", { 75.f,20.f }))
         {
-            std::copy(std::begin(vars::defaultClicksTemp), std::end(vars::defaultClicksTemp), std::begin(prearray::defaultClicks));
-            std::copy(std::begin(vars::butterflyClicksTemp), std::end(vars::butterflyClicksTemp), std::begin(prearray::butterflyClicks));
+            std::copy(std::begin(vars::clicksTemp), std::end(vars::clicksTemp), std::begin(vars::clicks));
         }
         if (ImGui::IsItemHovered()) { ImGui::SetTooltip("resets array to original state"); }
         ImGui::SetCursorPos({ 140.f,180.f });
@@ -71,17 +68,18 @@ static void showManipulate(bool* p_open) {
         {
             decrease();
         }
+
         std::string decreaseTooltip;
-        if (!vars::decreaseInvert)
-            decreaseTooltip = "everything OVER the max ms will get decreased by " + std::to_string(vars::decreaseBy);
+        if (!modify::decreaseInvert)
+            decreaseTooltip = "everything OVER the max ms will get decreased by " + std::to_string(modify::decreaseBy);
         else
-            decreaseTooltip = "everything UNDER the max ms will get decreased by " + std::to_string(vars::decreaseBy);
+            decreaseTooltip = "everything UNDER the max ms will get decreased by " + std::to_string(modify::decreaseBy);
 
         if (ImGui::IsItemHovered()) { ImGui::SetTooltip(decreaseTooltip.c_str()); }
         ImGui::SetCursorPos({ 140.f,210.f });
 
-        ImGui::Checkbox("Invert", &vars::decreaseInvert);
-        std::string invertTooltip = "if enabled, everything UNDER the max ms will get decreased by" + std::to_string(vars::decreaseBy);
+        ImGui::Checkbox("Invert", &modify::decreaseInvert);
+        std::string invertTooltip = "if enabled, everything UNDER the max ms will get decreased by" + std::to_string(modify::decreaseBy);
         if (ImGui::IsItemHovered()) { ImGui::SetTooltip(invertTooltip.c_str()); }
 
         ImGui::SetCursorPos({ 30.f,30.f });
@@ -91,22 +89,23 @@ static void showManipulate(bool* p_open) {
         ImGui::PushStyleColor(ImGuiCol_ChildBg, test);
         ImGui::BeginChild("child0", { 190.f,130.f }, true);
 
-        ImGui::SetCursorPos({ 17.f,25.f });
+        ImGui::SetCursorPos({ 17.f,20.f });
         ImGui::PushItemWidth(120);
-        ImGui::SliderInt("max", &vars::widthMax , 0, 1000);
-        ImGui::PopItemWidth();
+        ImGui::SliderInt("max", &modify::widthMax , 0, 1000);
         if (ImGui::IsItemHovered()) { ImGui::SetTooltip("(light blue color on graph)"); }
 
-        ImGui::SetCursorPos({ 17.f,55.f });
-        ImGui::PushItemWidth(120);
-        ImGui::SliderInt("min", &vars::widthMin, 0, 1000);
-        ImGui::PopItemWidth();
+        ImGui::SetCursorPos({ 17.f,45.f });
+        ImGui::SliderInt("min", &modify::widthMin, 0, 1000);
         if (ImGui::IsItemHovered()) { ImGui::SetTooltip("(purple color on graph)"); }
 
-        ImGui::SetCursorPos({ 17.f,85.f });
-        ImGui::PushItemWidth(120);
-        ImGui::SliderInt("range", &vars::decreaseBy, -500, 500);
+        ImGui::SetCursorPos({ 17.f,70.f });
+        ImGui::SliderInt("range", &modify::decreaseBy, -500, 500);
         if (ImGui::IsItemHovered()) { ImGui::SetTooltip("how much to decrease by (negative values will add instead)"); }
+
+        ImGui::SetCursorPos({ 17.f,95.f });
+        ImGui::SliderInt("chance", &modify::modifyChance, 0, 100);
+        if (ImGui::IsItemHovered()) { ImGui::SetTooltip("chance to modify each click"); }
+
         ImGui::PopItemWidth();
         ImGui::PopStyleColor();
         ImGui::PopStyleVar(2);
@@ -152,11 +151,11 @@ static void showGraph(bool* p_open) {
 
         if (ImPlot::BeginPlot(" ")) {
 
-            ImVec2 h1 = ImPlot::PlotToPixels(ImPlotPoint(2000, vars::widthMin));
-            ImVec2 h2 = ImPlot::PlotToPixels(ImPlotPoint(0, vars::widthMin));
+            ImVec2 h1 = ImPlot::PlotToPixels(ImPlotPoint(2000, modify::widthMin));
+            ImVec2 h2 = ImPlot::PlotToPixels(ImPlotPoint(0, modify::widthMin));
 
-            ImVec2 m1 = ImPlot::PlotToPixels(ImPlotPoint(2000, vars::widthMax));
-            ImVec2 m2 = ImPlot::PlotToPixels(ImPlotPoint(0, vars::widthMax));
+            ImVec2 m1 = ImPlot::PlotToPixels(ImPlotPoint(2000, modify::widthMax));
+            ImVec2 m2 = ImPlot::PlotToPixels(ImPlotPoint(0, modify::widthMax));
 
             ImVec2 l1 = ImPlot::PlotToPixels(ImPlotPoint(vars::crntLeftclick, 200));
             ImVec2 l2 = ImPlot::PlotToPixels(ImPlotPoint(vars::crntLeftclick,-50));
@@ -164,9 +163,7 @@ static void showGraph(bool* p_open) {
             ImVec2 r1 = ImPlot::PlotToPixels(ImPlotPoint(vars::crntRightclick, 200));
             ImVec2 r2 = ImPlot::PlotToPixels(ImPlotPoint(vars::crntRightclick, -50));
 
-            ImPlot::PlotLine("Custom clicks", vars::cpsTemp, vars::amountClicks);
-            ImPlot::PlotLine("Default clicks", prearray::defaultClicks, 2000);
-            ImPlot::PlotLine("Butterfly clicks", prearray::butterflyClicks, 1469);
+            ImPlot::PlotLine("Clicks", vars::clicks, vars::currentClickAmount);
 
             ImPlot::GetPlotDrawList()->AddLine(l1, l2, IM_COL32(255, 0, 0, 255), 2);
             ImPlot::GetPlotDrawList()->AddLine(r1, r2, IM_COL32(0, 255, 0, 255), 2);
@@ -307,8 +304,8 @@ int APIENTRY WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
         ImGui_ImplWin32_NewFrame();
         ImGui::NewFrame();
         {
-            if (menu::manipulate)
-                showManipulate(&menu::manipulate);
+            if (menu::modify)
+                showModify(&menu::modify);
 
             if (menu::watermark)
                 showWatermark(&menu::watermark);
@@ -577,7 +574,7 @@ int APIENTRY WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
                     ImGui::SetCursorPos({ 125.f, 40.f });
                     if (menu::rand == 1)
                         ImGui::OpenPopup("WARNING");
-                    if (menu::rand == 1 && vars::amountClicks == 0) {
+                    if (menu::rand == 1 && vars::loadedClicksAmount == 0) {
                         bool open = true;
                         if (ImGui::BeginPopupModal("WARNING", &open, ImGuiWindowFlags_NoResize))
                         {
@@ -642,17 +639,12 @@ int APIENTRY WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
                     ImGui::SetCursorPos({ 300.5, 237.f });
                     if (ImGui::Button("##MANIPULATE", { 30.f,30.f })) { //ICON_FA_CHART_LINE
                         menu::graph = true;
-                        menu::manipulate = !menu::manipulate;
+                        menu::modify = !menu::modify;
                     }
                     if (ImGui::IsItemHovered()) { ImGui::SetTooltip("Manipulate clicks"); }
 
                     ImGui::SetCursorPos({ 262.5, 237.f });
                     if (ImGui::Button("##GRAPH", { 30.f,30.f })) { //ICON_FA_CHART_LINE
-                        
-                        for (int i = 0; i < vars::amountClicks; i++) {
-                            vars::cpsTemp[i] = vars::loadedClicks[i] / vars::leftBoost;
-                        }
-                        
                         menu::graph = !menu::graph;
                     }
                     if (ImGui::IsItemHovered()) { ImGui::SetTooltip("Show clicks graph"); }
@@ -723,7 +715,7 @@ int APIENTRY WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
                     bool open = true;
                     if (ImGui::BeginPopupModal("Loaded", &open, ImGuiWindowFlags_NoResize))
                     {
-                        std::string clicksLoaded = "Successfully loaded " + std::to_string(vars::amountClicks) + " clicks.";
+                        std::string clicksLoaded = "Successfully loaded " + std::to_string(vars::loadedClicksAmount) + " clicks.";
                         ImGui::Text(clicksLoaded.c_str());
                         
                         if (ImGui::Button("Close"))
@@ -774,6 +766,19 @@ int APIENTRY WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
                     ImPlot::PopStyleVar();
                 }
 
+                if (g) {
+                    // fill temp array
+                    std::fill(vars::clicksTemp, vars::clicksTemp + 5000, 10);
+                    std::copy(std::begin(prearray::defaultClicks), std::end(prearray::defaultClicks), std::begin(vars::clicksTemp));
+
+                    // fill main array
+                    std::fill(vars::clicks, vars::clicks + 5000, 10);
+                    std::copy(std::begin(prearray::defaultClicks), std::end(prearray::defaultClicks), std::begin(vars::clicks));
+                    vars::currentClickAmount = 2000;
+                    g = 0;
+                }
+                std::cout << vars::currentClickAmount << "\n";
+
                 if (menu::tab == 3) {
 
                     tab1 = 0;
@@ -799,7 +804,37 @@ int APIENTRY WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
                     ImGui::Text("Randomisation");
                     ImGui::SetCursorPos({ 0.f, 130.f });
                     ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 6.f);
-                    ImGui::ListBox("", &menu::rand, rands, IM_ARRAYSIZE(rands), 3);
+
+                    if (ImGui::ListBox("", &menu::rand, rands, IM_ARRAYSIZE(rands), 3)) {
+                        if (menu::rand == 0) {
+                            // fill to temp array
+                            std::fill(vars::clicksTemp, vars::clicksTemp + 5000, 0);
+                            std::copy(std::begin(prearray::defaultClicks), std::end(prearray::defaultClicks), std::begin(vars::clicksTemp));
+
+                            // fill to main array
+                            std::fill(vars::clicks, vars::clicks + 5000, 10);
+                            std::copy(std::begin(prearray::defaultClicks), std::end(prearray::defaultClicks), std::begin(vars::clicks));
+
+                            vars::averageCps = 146;
+                            vars::currentClickAmount = 2000;
+                        } 
+                        else if (menu::rand == 1) {
+                            vars::currentClickAmount = vars::loadedClicksAmount;
+                        }
+                        else {
+                            // fill to temp array
+                            std::fill(vars::clicksTemp, vars::clicksTemp + 5000, 0);
+                            std::copy(std::begin(prearray::butterflyClicks), std::end(prearray::butterflyClicks), std::begin(vars::clicksTemp));
+
+                            // fill to main array
+                            std::fill(vars::clicks, vars::clicks + 5000, 10);
+                            std::copy(std::begin(prearray::butterflyClicks), std::end(prearray::butterflyClicks), std::begin(vars::clicks));
+
+                            vars::averageCps = 89;
+                            vars::currentClickAmount = 1469;
+                        }
+                    }
+
                     ImGui::PopStyleVar();
                     ImGui::PopItemWidth();
 
@@ -809,32 +844,30 @@ int APIENTRY WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
                     ImGui::EndChild();
 
                     ImGui::PushFont(smallfont);
-                    
 
-                    //works for now
                     ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 5.f);
                     ImGui::SetCursorPos({ 345.f,45.f });
-                    std::string b1 = "Left (" + get_key_name_by_id(vars::leftBind) + ")";
+                    std::string b1 = "Left (" + get_key_name_by_id(binds::leftBind) + ")";
                     if (ImGui::Button(b1.c_str(), {80,40})) {
-                        keybind(vars::leftBind);
+                        keybind(binds::leftBind);
                     }
                     
                     ImGui::SetCursorPos({ 345.f,95 });
-                    std::string b2 = "Right (" + get_key_name_by_id(vars::rightBind) + ")";
+                    std::string b2 = "Right (" + get_key_name_by_id(binds::rightBind) + ")";
                     if (ImGui::Button(b2.c_str(), { 80,40 })) {
-                        keybind(vars::rightBind);
+                        keybind(binds::rightBind);
                     }
 
                     ImGui::SetCursorPos({ 345.f,145.f });
-                    std::string b3 = "Shift (" + get_key_name_by_id(vars::shiftBind) + ")";
+                    std::string b3 = "Shift (" + get_key_name_by_id(binds::shiftBind) + ")";
                     if (ImGui::Button(b3.c_str(), { 80,40 })) {
-                        keybind(vars::shiftBind);
+                        keybind(binds::shiftBind);
                     }
 
                     ImGui::SetCursorPos({ 345.f,195.f });
-                    std::string b4 = "Hide (" + get_key_name_by_id(vars::hideBind) + ")";
+                    std::string b4 = "Hide (" + get_key_name_by_id(binds::hideBind) + ")";
                     if (ImGui::Button(b4.c_str(), { 80,40 })) {
-                        keybind(vars::hideBind);
+                        keybind(binds::hideBind);
                     }
                     ImGui::PopStyleVar();
                     ImGui::PopFont();

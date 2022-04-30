@@ -38,6 +38,7 @@
     <ClCompile Include="fonts\font_awesome.cpp">
       <Filter>fonts</Filter>
     </ClCompile>
+    <ClCompile Include="menu\menu.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="main.h" />
@@ -110,6 +111,7 @@
     </ClInclude>
     <ClInclude Include="autoclicker\sounds.h" />
     <ClInclude Include="autoclicker\misc.h" />
+    <ClInclude Include="menu\menu.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="imgui">
@@ -126,6 +128,9 @@
     </Filter>
     <Filter Include="destruct">
       <UniqueIdentifier>{bc45655e-3378-446c-9281-af13a9ce42dc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="menu">
+      <UniqueIdentifier>{cbb2f9f3-1ba2-4a24-8e26-6fab0105c2a7}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

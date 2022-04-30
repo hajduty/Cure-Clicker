@@ -77,20 +77,22 @@ void saveClicks() {
 }
 
 void loadCps(std::string filename) {
-	std::fill(vars::loadedClicks, vars::loadedClicks + 5000, 0);
+	std::fill(vars::clicks, vars::clicks + 5000, 0);
+	std::fill(vars::clicksTemp, vars::clicksTemp + 5000, 0);
 	std::ifstream ms;
 
 	ms.open(filename);
 
 	int n = 0;
-	while (ms >> vars::loadedClicks[n]) {
-		vars::cpsTemp[n] = vars::loadedClicks[n];
+	while (ms >> vars::clicks[n]) {
+		vars::clicksTemp[n] = vars::clicks[n];
 		n++;
 		Sleep(0.05);
 	}
-	vars::amountClicks = n;
 
-	vars::averageCps = average(vars::loadedClicks, n);
+	vars::loadedClicksAmount = n;
+
+	vars::averageCps = average(vars::clicks, n);
 
 	std::cout << "\n" << vars::averageCps;
 

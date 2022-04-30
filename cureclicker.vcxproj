@@ -176,6 +176,7 @@
     <ClCompile Include="implot\implot.cpp" />
     <ClCompile Include="implot\implot_items.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="menu\menu.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="autoclicker\clicks.h" />
@@ -204,6 +205,7 @@
     <ClInclude Include="main.h" />
     <ClInclude Include="imgui\style.h" />
     <ClInclude Include="fonts\tahoma.h" />
+    <ClInclude Include="menu\menu.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

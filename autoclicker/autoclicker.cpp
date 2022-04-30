@@ -13,55 +13,11 @@ bool inJava() {
 		return false;
 	}
 
-	// if current window is clicker window, clicking should be disabled
+	// if current window is clicker window, disable clicking
 	if (GetForegroundWindow() == FindWindowA(NULL, "name"))
 		return false;
 
 	return true;
-}
-
-int leftRando(int x) {
-	if (menu::rand == 0) {
-		int xe = ((prearray::defaultClicks[x] / vars::leftBoost) / 2);
-		std::cout << xe << "\n";
-		menu::cps = xe;
-		if (xe > 2)
-			return xe;
-	}
-	else if (menu::rand == 1) {
-		int xe = ((vars::loadedClicks[x] / vars::leftBoost) / 2);
-		menu::cps = xe;
-		if (xe > 2)
-			return xe;
-	}
-	else {
-		int xe = ((prearray::butterflyClicks[x] / vars::leftBoost) / 2);
-		menu::cps = xe;
-		if (xe > 2)
-			return xe;
-	}
-	return 100;
-}
-
-void jitter() {
-	while (true) {
-		Sleep(1);
-
-		if (!vars::jitter)
-			continue;
-
-		if (!inJava())
-			continue;
-
-		if (!vars::lEnabled && !vars::lockL)
-			continue;
-
-		if (!GetAsyncKeyState(VK_LBUTTON))
-			continue;
-
-		mouse_event(MOUSEEVENTF_MOVE, invcheck::random_int(), invcheck::random_int(), 0, 0);
-		Sleep(leftRando(vars::crntLeftclick));
-	}
 }
 
 void shuffleClicks() {
@@ -69,15 +25,7 @@ void shuffleClicks() {
 	unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
 
 	// Shuffling our clicks
-
-	if (menu::rand == 0)
-		std::shuffle(prearray::defaultClicks, prearray::defaultClicks + 2000, std::default_random_engine(seed));
-	
-	if (menu::rand == 1)
-		std::shuffle(vars::loadedClicks, vars::loadedClicks + vars::amountClicks, std::default_random_engine(seed));
-	
-	if (menu::rand == 2)
-		std::shuffle(prearray::butterflyClicks, prearray::butterflyClicks + 1469, std::default_random_engine(seed));
+	std::shuffle(vars::clicks, vars::clicks + vars::loadedClicksAmount, std::default_random_engine(seed));
 
 	menu::shuffles += 1;
 	std::cout << "shuffled ";
@@ -89,20 +37,14 @@ bool is_cursor_visible() { //From Biscoito clicker
 
 	return true;
 }
-// gets next rightclick cps value from selected array
+// gets next rightclick cps value
 int rightRando(int x) {
-	if (menu::rand == 0) {
-		return ((prearray::defaultClicks[x] / vars::rightBoost) / 2);
-	}
-	else if (menu::rand == 1) {
-		int xe = ((vars::loadedClicks[x] / vars::rightBoost) / 2);
-		if (xe > 5)
-			return xe;
-	}
-	else {
-		return ((prearray::butterflyClicks[x] / vars::rightBoost) / 2);
-	}
-	return 100;
+	int xe = ((vars::clicks[x] / vars::leftBoost) / 2);
+	menu::cps = xe;
+	if (xe > 2)
+		return xe;
+	else
+		return ((vars::clicks[x - 1] / vars::leftBoost) / 2);
 }
 
 // sends right click
@@ -125,6 +67,16 @@ void sendRight(int currentClick) {
 				PostMessage(GetForegroundWindow(), WM_RBUTTONUP, MK_RBUTTON, MAKELPARAM(0, 0));
 			}
 	}
+}
+
+// gets next leftclick cps value
+int leftRando(int x) {
+	int xe = ((vars::clicks[x] / vars::leftBoost) / 2);
+	menu::cps = xe;
+	if (xe > 2)
+		return xe;
+	else
+		return ((vars::clicks[x - 1] / vars::leftBoost) / 2);
 }
 
 // sends left click
@@ -173,24 +125,31 @@ void sendLeft(int currentClick) {
 	}
 }
 
+void jitter() {
+	while (true) {
+		Sleep(1);
+
+		if (!vars::jitter)
+			continue;
+
+		if (!inJava())
+			continue;
+
+		if (!vars::lEnabled && !vars::lockL)
+			continue;
+
+		if (!GetAsyncKeyState(VK_LBUTTON))
+			continue;
+
+		mouse_event(MOUSEEVENTF_MOVE, invcheck::random_int(), invcheck::random_int(), 0, 0);
+		Sleep(leftRando(vars::crntLeftclick));
+	}
+}
+
 void leftClickThread() {
-	std::copy(std::begin(prearray::defaultClicks), std::end(prearray::defaultClicks), std::begin(vars::defaultClicksTemp));
-	std::copy(std::begin(prearray::butterflyClicks), std::end(prearray::butterflyClicks), std::begin(vars::butterflyClicksTemp));
 	while (true) {
 
 		Sleep(10);
-
-		if (menu::rand == 0) {
-			vars::currentClickAmount = 2000;
-			vars::averageCps = 146;
-		}
-		if (menu::rand == 1) {
-			vars::currentClickAmount = vars::amountClicks;
-		}
-		if (menu::rand == 2) {
-			vars::currentClickAmount = 1469;
-			vars::averageCps = 89;
-		}
 		
 		if (vars::lEnabled | vars::lockL)	
 			if ((vars::crntLeftclick + 1) >= vars::currentClickAmount) {
@@ -249,26 +208,26 @@ void rightClickThread() {
 void bindThreads() {
 	while (true) {
 
-		if (GetAsyncKeyState(vars::hideBind) & 0x8000 && vars::hideBind != 0) {
+		if (GetAsyncKeyState(binds::hideBind) & 0x8000 && binds::hideBind != 0) {
 			menu::hide = !menu::hide;
 			Sleep(150);
 		}
 
 		if (inJava()) {
-			if (GetAsyncKeyState(vars::rightBind) & 0x8000 && vars::rightBind != 0) {
+			if (GetAsyncKeyState(binds::rightBind) & 0x8000 && binds::rightBind != 0) {
 				vars::rEnabled = !vars::rEnabled;
 				Sleep(150);
 			}
 
-			if (GetAsyncKeyState(vars::leftBind) & 0x8000 && vars::leftBind != 0) {
+			if (GetAsyncKeyState(binds::leftBind) & 0x8000 && binds::leftBind != 0) {
 				vars::lEnabled = !vars::lEnabled;
 				Sleep(150);
 			}
 
-			if (GetAsyncKeyState(vars::shiftBind) & 0x8000 && vars::shiftBind != 0) {
+			if (GetAsyncKeyState(binds::shiftBind) & 0x8000 && binds::shiftBind != 0) {
 				int tempLeft = 0;
 				int tempRight = 0;
-				while (GetAsyncKeyState(vars::shiftBind) & 0x8000) {
+				while (GetAsyncKeyState(binds::shiftBind) & 0x8000) {
 					if (vars::lEnabled) {
 						tempRight = 1;
 						vars::lEnabled = !vars::lEnabled;
@@ -323,15 +282,15 @@ void calcClicks() {
 	std::cout << " ";
 	static auto captureTime2 = time();
 
-	if (menu::click == 2) {
-		if (menu::click == 2) {
-			menu::click = 1;
-			menu::time2Total = time() - captureTime2;
-			int totalTime = menu::time2Total - menu::time1Total;
-			menu::ms = totalTime;
+	if (record::click == 2) {
+		if (record::click == 2) {
+			record::click = 1;
+			record::time2Total = time() - captureTime2;
+			int totalTime = record::time2Total - record::time1Total;
+			record::ms = totalTime;
 
-			if (menu::ms < menu::msLimitMax) {
-				vars::recordedClicks[menu::totalClicks] = menu::ms;
+			if (record::ms < menu::msLimitMax) {
+				vars::recordedClicks[menu::totalClicks] = record::ms;
 				std::cout << vars::recordedClicks[menu::totalClicks] << std::endl;
 			}
 
@@ -339,12 +298,12 @@ void calcClicks() {
 	}
 
 	static auto captureTime1 = time();
-	if (menu::click == 1) {
-		menu::click = 2;
-		menu::time1Total = time() - captureTime1;
-		int totalTime = menu::time1Total - menu::time2Total;
+	if (record::click == 1) {
+		record::click = 2;
+		record::time1Total = time() - captureTime1;
+		int totalTime = record::time1Total - record::time2Total;
 		if (totalTime > menu::msLimitMin) {
-			menu::ms = totalTime;
+			record::ms = totalTime;
 		}
 	}
 }

@@ -1,47 +1,52 @@
 #pragma once
 
-namespace vars
+namespace modify
 {
+	inline int decreaseBy;							// DECREASE BY
+	inline int modifyChance = 50;
 	inline bool decreaseInvert = false;
-	inline int defaultClicksTemp[2000];
-	inline int butterflyClicksTemp[1469];
-	inline bool recordGame = false;					// RECORD GAME
-	inline int crntLeftclick;						// CURRENT CLICK
-	inline int crntRightclick;						// CURRENT CLICK
-	inline int decreaseBy;						// DECREASE BY
-	inline float jrange = 3;						// JITTER RANGE
-	inline bool jitter = false;						// JITTER TOGGLE
-	inline bool lockL = false;						// LOCK LEFT CLICKER (ALWAYS CLICK)
-	inline int amountClicks;						// AMOUNT OF CLICKS IN LOADED TXT FILE
-	inline static char fName[128] = "filename";		// SAVE FILENAME
-	inline int sessionClicks;						// CLICKS THIS SESSION
-	inline double averageCps;						// AVERAGE CPS
-	inline int cpsTemp[5000];						// TEMP ARRAY TO SHOW GRAPH
-	inline int loadedClicks[5000];					// LOADED CLICKS
-	inline int recordedClicks[5000];				// ALL CURRENT RECORDED CLICKS
-	inline float leftBoost = 1;						// LEFT CPS DIVISOR
-	inline POINT pos = { 0, 0 };					// SCREEN POSITION
-	inline float rightBoost = 1;					// RIGHT CPS DIVISOR
-	inline float blockhit;							// BLOCKHIT CHANCE
+	inline int widthRange = 20;						// HOW MUCH TO ADD OR DECREASE 
+	inline int widthMin = 20;						// MIN MS VALUE TO MODIFY
+	inline int widthMax = 130;						// MAX MS VALUE TO MODIFY
+}
+
+namespace binds
+{
 	inline int leftBind = { 0 };
 	inline int rightBind = { 0 };
 	inline int potfillBind = { 0 };
 	inline int shiftBind = { 160 };
 	inline int hideBind = { 45 };
 	inline int throwpotBind = { 0 };
+}
+
+namespace vars
+{
+	inline int clicksTemp[5000];						// TEMP ARRAY TO SHOW GRAPH
+	inline int clicks[5000];						// CLICKS
+	inline int recordedClicks[5000];				// ALL CURRENT RECORDED CLICKS
+	inline int currentClickAmount;					// AMOUNT OF CLICKS IN CURRENT CPS ARRAY
+	inline bool recordGame = false;					// RECORD GAME
+	inline int crntLeftclick;						// CURRENT CLICK
+	inline int crntRightclick;						// CURRENT CLICK
+	inline float jrange = 3;						// JITTER RANGE
+	inline bool jitter = false;						// JITTER TOGGLE
+	inline bool lockL = false;						// LOCK LEFT CLICKER (ALWAYS CLICK)
+	inline int loadedClicksAmount;					// AMOUNT OF CLICKS IN LOADED TXT FILE
+	inline static char fName[128] = "filename";		// SAVE FILENAME
+	inline int sessionClicks;						// CLICKS THIS SESSION
+	inline double averageCps;						// AVERAGE CPS
+	inline float leftBoost = 1;						// LEFT CPS DIVISOR
+	inline POINT pos = { 0, 0 };					// SCREEN POSITION
+	inline float rightBoost = 1;					// RIGHT CPS DIVISOR
+	inline float blockhit;							// BLOCKHIT CHANCE
 	inline bool mcOnly = true;						// MINECRAFT ONLY TOGGLE
 	inline bool breakBlock = false;					// BREAK BLOCKS WHILE AUTO CLICKING TOGGLE (Flags on some servers)
 	inline bool eat = false;						// EAT FOOD WHILE RIGHT CLICKING TOGGLE (Might flag on some servers)
 	inline bool invOnly = true;						// INVENTORY ONLY TOGGLE (true == doesn't work)
 	inline bool shiftDis = true;					// DISABLES ALL CLICKING WHILE SHIFTING (PANIC BUTTON)
-	inline int potfillMs = 60;						// POTFILL DELAY
-	inline int wtapPercent = 0;						// WTAP PERCENTAGE
 	inline bool lEnabled = false;					// LEFT CLICKER TOGGLE 	
 	inline bool rEnabled = false;					// RIGHT CLICKER TOGGLE
-	inline int currentClickAmount;					// AMOUNT OF CLICKS IN CURRENT CPS ARRAY
-	inline int widthRange = 20;						// HOW MUCH TO ADD OR DECREASE 
-	inline int widthMin = 20;						// MIN MS VALUE TO MODIFY
-	inline int widthMax = 130;						// MAX MS VALUE TO MODIFY
 }
 
 namespace destruct
@@ -67,15 +72,19 @@ namespace menu
 	inline int totalClicks;							// CLICKS RECORDED THIS SESSION
 	inline bool graph = false;						// GRAPH TOGGLE
 	inline bool des = false;						// DESTRUCT MENU TOGGLE
-	inline int click = 1;							// ?
 	inline int msLimitMax = 2000;					// MS LIMIT WHEN RECORDING CLICKS
 	inline int msLimitMin = 5;						// MS LIMIT WHEN RECORDING CLICKS
-	inline int time1Total = 1;						// TIME WHEN FIRST CLICK (in milliseconds)
-	inline int time2Total = 1;						// TIME WHEN SECOND CLICK (in milliseconds) 
-	inline int ms = 0;								// THE TIME BETWEEN FIRST AND SECOND CLICK
 	inline int cps = 0;								// ?
 	inline int screen[2] = { 0,0 };
 	inline int shuffles = 0;						// SESSION SHUFFLES
-	inline bool manipulate = false;					// MANIPULATE CLICKS WINDOW
-	inline bool watermark = false;					
+	inline bool modify = false;						// MODIFY CLICKS WINDOW
+	inline bool watermark = false;					// WATERMARK WINDOW
+}
+
+namespace record
+{
+	inline int time1Total = 1;						// TIME WHEN FIRST CLICK (in milliseconds)
+	inline int time2Total = 1;						// TIME WHEN SECOND CLICK (in milliseconds) 
+	inline int ms = 0;								// THE TIME BETWEEN FIRST AND SECOND CLICK
+	inline int click = 1;							// ?
 }
